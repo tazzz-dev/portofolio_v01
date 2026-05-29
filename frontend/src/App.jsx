@@ -546,7 +546,7 @@ function Footer({ data }) {
   return (
     <footer className="py-8 px-6 border-t border-slate-800/50 text-center text-slate-500 text-sm relative z-10 backdrop-blur-sm bg-black/10">
       <p>
-        Dibuat dengan ❤️ oleh{" "}
+        Dibuat oleh{" "}
         <span className="text-cyan-400 font-medium">{data.heroName}</span> · {new Date().getFullYear()}
       </p>
     </footer>
@@ -567,43 +567,100 @@ function SectionTitle({ label, title, center = false }) {
 // ─── APP ──────────────────────────────────────────────────────────────────────
 export default function App() {
   const [portfolioData, setPortfolioData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  
+  // Manajemen urutan waktu: 
+  // 0: Loading (Infinity), 1: Morph ke Garis, 2: Slide Out Kanan, 3: Hilang
+  const [phase, setPhase] = useState(0); 
 
   useEffect(() => {
-    // Meminta data ke backend
+    // Catat waktu eksekusi agar kalkulasi minimum 2 detik presisi
+    const startTime = Date.now();
+
     axios.get("http://localhost:8080/")
       .then((response) => {
         setPortfolioData(response.data);
-        setLoading(false);
+        
+        const elapsedTime = Date.now() - startTime;
+        const remainingTime = Math.max(0, 2000 - elapsedTime);
+
+        // Setelah minimal 2 detik...
+        setTimeout(() => {
+          setPhase(1); // Trigger transisi menjadi garis lurus
+          
+          // Durasi animasi garis membentuk adalah 700ms. 
+          // Anda minta jeda setengah detik (500ms) SETELAH garis jadi.
+          // Total menunggu = 700ms + 500ms = 1200ms.
+          setTimeout(() => {
+            setPhase(2); // Trigger layar berpindah ke sisi kanan
+            
+            // Tunggu animasi slide-out selesai sebelum menghapus dari DOM
+            setTimeout(() => {
+              setPhase(3); 
+            }, 800); // 800ms sinkron dengan durasi transisi slide-out CSS
+            
+          }, 1200); 
+          
+        }, remainingTime);
       })
       .catch((error) => {
-        console.error("Error fetching data:", error);
-        setLoading(false);
+        console.error("Kesalahan pengambilan data:", error);
       });
   }, []);
 
-  // Tampilkan layar loading selama data belum didapatkan
-  if (loading || !portfolioData) {
-    return (
-      <div className="min-h-screen bg-[#070b14] flex items-center justify-center">
-        <span className="text-cyan-400 font-mono animate-pulse tracking-widest text-sm">
-          MENGHUBUNGKAN KE SERVER...
-        </span>
-      </div>
-    );
-  }
-
-  // Lempar portfolioData ke semua sub-komponen melalui props 'data'
   return (
-    <div className="min-h-screen text-white relative">
-      <AnimatedBackground />
-      <Navbar data={portfolioData} />
-      <Hero data={portfolioData} />
-      <About data={portfolioData} />
-      <Skills data={portfolioData} />
-      <Projects data={portfolioData} />
-      <Contact data={portfolioData} />
-      <Footer data={portfolioData} />
-    </div>
+    <>
+      {/* ─── LAYER 1: LOADING SCREEN OVERLAY ─── */}
+      {phase < 3 && (
+        <div 
+          className={`fixed inset-0 z-[100] bg-[#070b14] flex items-center justify-center overflow-hidden transition-transform duration-[800ms] ease-in-out ${
+            phase >= 2 ? "translate-x-full" : "translate-x-0"
+          }`}
+        >
+          {/* Kontainer Morphing: Dari kotak pembungkus logo menjadi Garis Lurus */}
+          <div 
+            className={`transition-all duration-[700ms] ease-in-out flex items-center justify-center overflow-hidden ${
+              phase === 0 
+                ? "w-32 h-32 bg-transparent" 
+                : "w-[100vw] h-1 bg-cyan-500 shadow-[0_0_20px_rgba(6,182,212,1)]"
+            }`}
+          >
+            {/* SVG Logo Infinity */}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className={`text-cyan-400 drop-shadow-[0_0_10px_rgba(6,182,212,0.8)] transition-all duration-[700ms] ease-in-out ${
+                phase === 0 
+                  ? "w-24 h-24 opacity-100 scale-100 animate-pulse" 
+                  : "w-24 h-0 opacity-0 scale-y-0"
+              }`}
+            >
+              {/* Path yang menggambar bentuk Infinity (Angka 8 tertidur) */}
+              <path d="M12 12c-2-2.67-4-4-6-4a4 4 0 1 0 0 8c2 0 4-1.33 6-4zm0 0c2 2.67 4 4 6 4a4 4 0 1 0 0-8c-2 0-4 1.33-6 4z" />
+            </svg>
+          </div>
+        </div>
+      )}
+
+      {/* ─── LAYER 2: MAIN APP CONTENT ─── */}
+      {portfolioData ? (
+        <div className="min-h-screen text-white relative">
+          <AnimatedBackground />
+          <Navbar data={portfolioData} />
+          <Hero data={portfolioData} />
+          <About data={portfolioData} />
+          <Skills data={portfolioData} />
+          <Projects data={portfolioData} />
+          <Contact data={portfolioData} />
+          <Footer data={portfolioData} />
+        </div>
+      ) : (
+        <div className="min-h-screen bg-[#070b14]" />
+      )}
+    </>
   );
 }
