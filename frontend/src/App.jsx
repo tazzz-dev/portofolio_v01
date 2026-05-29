@@ -1,97 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-
-// ─── DATA DUMMY ───────────────────────────────────────────────────────────────
-const DATA = {
-  navName: "HAN",
-  heroName: "Muhammad Mumtaaz",
-  roles: [
-    "Fullstack Developer", 
-    "Game Developer", 
-    "Robotics Enthusiast"
-  ],
-  about:
-    "I build things — for the web, for games, and for the real world. From crafting seamless web apps to developing interactive game mechanics and tinkering with robotics, I love turning ideas into something tangible.",
-  email: "mumtaazraihaan@gmail.com",
-  github: "https://github.com/tazzz-dev",
-  linkedin: "https://linkedin.com/in/muhammadmumtaaz",
-  
-  // GANTI INI NANTI: 
-  // Gunakan foto Anda dengan format PNG TRANSPARAN (tanpa background)
-  profileImage: "/foto-saya.png", 
-  
-  skillCategories: [
-    {
-      title: "Languages",
-      icon: "code",
-      items: [
-        { name: "HTML", slug: "html5", color: "E34F26" },
-        { name: "CSS", slug: "css", color: "1572B6" },
-        { name: "JavaScript", slug: "javascript", color: "F7DF1E" },
-        { name: "TypeScript", slug: "typescript", color: "3178C6" }
-      ]
-    },
-    {
-      title: "Frameworks",
-      icon: "layers",
-      items: [
-        { name: "React", slug: "react", color: "61DAFB" },
-        { name: "Node.js", slug: "nodedotjs", color: "339933" },
-        { name: "Express", slug: "express", color: "ffffff" },
-        { name: "CodeIgniter", slug: "codeigniter", color: "#EF4223" },
-        { name: "Tailwind", slug: "tailwindcss", color: "06B6D4" }
-      ]
-    }, 
-    {
-      title: "Creative & Tools",
-      icon: "palette",
-      items: [
-        { name: "Unity", slug: "unity", color: "ffffff" },
-        { name: "Arduino", slug: "arduino", color: "00979D" },
-        { name: "MYSQL", slug: "mysql", color: "4479A1" },
-        { name: "Git", slug: "git", color: "F05032" }
-      ]
-    }
-  ],
-
-  projects: [
-    {
-      id: 1,
-      title: "E-Commerce Platform",
-      description:
-        "Platform belanja online lengkap dengan fitur keranjang, pembayaran, dan manajemen produk berbasis Next.js & Stripe.",
-      tags: ["Next.js", "Stripe", "PostgreSQL", "Tailwind"],
-      link: "#",
-      repo: "#",
-    },
-    {
-      id: 2,
-      title: "Task Management App",
-      description:
-        "Aplikasi manajemen tugas real-time dengan kolaborasi tim, drag-and-drop, dan notifikasi push menggunakan Socket.io.",
-      tags: ["React", "Node.js", "Socket.io", "MongoDB"],
-      link: "#",
-      repo: "#",
-    },
-    {
-      id: 3,
-      title: "Weather Dashboard",
-      description:
-        "Dashboard cuaca interaktif yang menampilkan data cuaca real-time dari berbagai kota dengan visualisasi grafik.",
-      tags: ["React", "Chart.js", "OpenWeather API"],
-      link: "#",
-      repo: "#",
-    },
-    {
-      id: 4,
-      title: "Blog CMS",
-      description:
-        "Sistem manajemen konten blog dengan editor markdown, manajemen kategori, dan SEO otomatis.",
-      tags: ["Next.js", "MDX", "Tailwind", "Vercel"],
-      link: "#",
-      repo: "#",
-    },
-  ]
-};
+import axios from "axios";
 
 // ─── ICONS (inline SVG) ───────────────────────────────────────────────────────
 const IconGithub = () => (
@@ -242,7 +150,7 @@ function Typewriter({ words }) {
 }
 
 // ─── NAVBAR ───────────────────────────────────────────────────────────────────
-function Navbar() {
+function Navbar({ data }) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   
@@ -271,7 +179,7 @@ function Navbar() {
           className="text-xl font-black tracking-tight cursor-pointer"
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
         >
-          <span className="text-white">{DATA.navName}</span>
+          <span className="text-white">{data.navName}</span>
           <span className="text-cyan-400">.</span>
         </span>
 
@@ -310,11 +218,11 @@ function Navbar() {
 }
 
 // ─── HERO & VINYL RECORD ──────────────────────────────────────────────────────
-function Hero() {
+function Hero({ data }) {
   const containerRef = useRef(null);
   const [rotation, setRotation] = useState({ x: 0, y: 0 });
 
-  const heroSkills = DATA.skillCategories.flatMap(c => c.items).slice(0, 7);
+  const heroSkills = data.skillCategories.flatMap(c => c.items).slice(0, 7);
 
   const handleMouseMove = (e) => {
     if (!containerRef.current) return;
@@ -346,15 +254,15 @@ function Hero() {
       <div className="max-w-6xl mx-auto w-full grid md:grid-cols-5 gap-12 items-center">
         <div className="md:col-span-3 space-y-6">
           <h1 className="text-6xl md:text-8xl font-extrabold leading-tight text-white tracking-tighter">
-            {DATA.heroName}
+            {data.heroName}
           </h1>
           
           <h2 className="text-xl md:text-2xl text-slate-300 font-medium tracking-wide min-h-[32px]">
-            <Typewriter words={DATA.roles} />
+            <Typewriter words={data.roles} />
           </h2>
           
           <p className="text-slate-400 max-w-lg leading-relaxed text-lg">
-            {DATA.about}
+            {data.about}
           </p>
 
           
@@ -374,13 +282,13 @@ function Hero() {
           </div>
 
           <div className="flex gap-4 pt-4">
-            <a href={DATA.github} target="_blank" rel="noreferrer" className="text-slate-500 hover:text-cyan-400 transition-colors">
+            <a href={data.github} target="_blank" rel="noreferrer" className="text-slate-500 hover:text-cyan-400 transition-colors">
               <IconGithub />
             </a>
-            <a href={DATA.linkedin} target="_blank" rel="noreferrer" className="text-slate-500 hover:text-cyan-400 transition-colors">
+            <a href={data.linkedin} target="_blank" rel="noreferrer" className="text-slate-500 hover:text-cyan-400 transition-colors">
               <IconLinkedin />
             </a>
-            <a href={`mailto:${DATA.email}`} className="text-slate-500 hover:text-cyan-400 transition-colors">
+            <a href={`mailto:${data.email}`} className="text-slate-500 hover:text-cyan-400 transition-colors">
               <IconMail />
             </a>
           </div>
@@ -401,7 +309,7 @@ function Hero() {
             {layers.map((layer) => (
               <img
                 key={layer.id}
-                src={DATA.profileImage}
+                src={data.profileImage}
                 alt="Muhammad Mumtaaz"
                 /* Perbaikan CSS:
                   - Menghapus rounded-2xl dan object-cover
@@ -424,7 +332,7 @@ function Hero() {
 }
 
 // ─── ABOUT (3D PARALLAX TILT + PERSISTENT STATE) ───────────────────────────
-function About() {
+function About({ data }) {
   return (
     <section id="about" className="py-24 px-6 relative z-10 overflow-hidden">
       <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-16 items-center">
@@ -432,7 +340,7 @@ function About() {
         {/* Kolom Teks */}
         <div>
           <SectionTitle label="Tentang Saya" title="The Journey" />
-          <p className="text-slate-400 leading-relaxed mt-6">{DATA.about}</p>
+          <p className="text-slate-400 leading-relaxed mt-6">{data.about}</p>
           <div className="grid grid-cols-2 gap-4 mt-8">
             {[
               { label: "Proyek Selesai", value: "20+" },
@@ -520,7 +428,7 @@ function SkillItem({ item }) {
 }
 
 // ─── SKILLS (KARTU KATEGORI) ──────────────────────────────────────────────────
-function Skills() {
+function Skills({ data }) {
   return (
     <section id="skills" className="py-24 px-6 relative z-10">
       <div className="max-w-6xl mx-auto">
@@ -530,7 +438,7 @@ function Skills() {
         </div>
 
         <div className="grid md:grid-cols-3 gap-6">
-          {DATA.skillCategories.map((category, idx) => (
+          {data.skillCategories.map((category, idx) => (
             <div key={idx} className="bg-[#0b1120]/80 backdrop-blur-md border border-slate-800/80 rounded-3xl p-6 md:p-8 flex flex-col gap-6 shadow-2xl">
               <div className="flex items-center gap-3 border-b border-slate-800/50 pb-4">
                 <span className="text-cyan-400">
@@ -555,13 +463,13 @@ function Skills() {
 }
 
 // ─── PROJECTS ─────────────────────────────────────────────────────────────────
-function Projects() {
+function Projects({ data }) {
   return (
     <section id="projects" className="py-24 px-6 relative z-10">
       <div className="max-w-6xl mx-auto">
         <SectionTitle label="Portofolio" title="Proyek Terbaru" />
         <div className="grid md:grid-cols-2 gap-6 mt-10">
-          {DATA.projects.map((p) => (
+          {data.projects.map((p) => (
             <div
               key={p.id}
               className="group bg-[#0b1120]/60 backdrop-blur-md border border-slate-800/50 hover:border-cyan-500/40 rounded-xl p-6 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/10"
@@ -596,7 +504,7 @@ function Projects() {
 }
 
 // ─── CONTACT ──────────────────────────────────────────────────────────────────
-function Contact() {
+function Contact({ data }) {
   return (
     <section id="contact" className="py-24 px-6 relative z-10">
       <div className="max-w-2xl mx-auto text-center">
@@ -606,13 +514,13 @@ function Contact() {
         </p>
         <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
           <a
-            href={`mailto:${DATA.email}`}
+            href={`mailto:${data.email}`}
             className="flex items-center gap-2 px-6 py-3 bg-cyan-500 hover:bg-cyan-400 text-[#070b14] font-bold rounded-lg transition-all hover:shadow-lg hover:shadow-cyan-500/30"
           >
             <IconMail /> Kirim Email
           </a>
           <a
-            href={DATA.linkedin}
+            href={data.linkedin}
             target="_blank"
             rel="noreferrer"
             className="flex items-center gap-2 px-6 py-3 border border-slate-600 hover:border-cyan-500 text-slate-300 hover:text-cyan-400 font-semibold rounded-lg transition-all backdrop-blur-sm bg-black/20"
@@ -620,7 +528,7 @@ function Contact() {
             <IconLinkedin /> LinkedIn
           </a>
           <a
-            href={DATA.github}
+            href={data.github}
             target="_blank"
             rel="noreferrer"
             className="flex items-center gap-2 px-6 py-3 border border-slate-600 hover:border-cyan-500 text-slate-300 hover:text-cyan-400 font-semibold rounded-lg transition-all backdrop-blur-sm bg-black/20"
@@ -634,12 +542,12 @@ function Contact() {
 }
 
 // ─── FOOTER ───────────────────────────────────────────────────────────────────
-function Footer() {
+function Footer({ data }) {
   return (
     <footer className="py-8 px-6 border-t border-slate-800/50 text-center text-slate-500 text-sm relative z-10 backdrop-blur-sm bg-black/10">
       <p>
         Dibuat dengan ❤️ oleh{" "}
-        <span className="text-cyan-400 font-medium">{DATA.heroName}</span> · {new Date().getFullYear()}
+        <span className="text-cyan-400 font-medium">{data.heroName}</span> · {new Date().getFullYear()}
       </p>
     </footer>
   );
@@ -658,16 +566,44 @@ function SectionTitle({ label, title, center = false }) {
 
 // ─── APP ──────────────────────────────────────────────────────────────────────
 export default function App() {
+  const [portfolioData, setPortfolioData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Meminta data ke backend
+    axios.get("http://localhost:8080/")
+      .then((response) => {
+        setPortfolioData(response.data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+        setLoading(false);
+      });
+  }, []);
+
+  // Tampilkan layar loading selama data belum didapatkan
+  if (loading || !portfolioData) {
+    return (
+      <div className="min-h-screen bg-[#070b14] flex items-center justify-center">
+        <span className="text-cyan-400 font-mono animate-pulse tracking-widest text-sm">
+          MENGHUBUNGKAN KE SERVER...
+        </span>
+      </div>
+    );
+  }
+
+  // Lempar portfolioData ke semua sub-komponen melalui props 'data'
   return (
     <div className="min-h-screen text-white relative">
       <AnimatedBackground />
-      <Navbar />
-      <Hero />
-      <About />
-      <Skills />
-      <Projects />
-      <Contact />
-      <Footer />
+      <Navbar data={portfolioData} />
+      <Hero data={portfolioData} />
+      <About data={portfolioData} />
+      <Skills data={portfolioData} />
+      <Projects data={portfolioData} />
+      <Contact data={portfolioData} />
+      <Footer data={portfolioData} />
     </div>
   );
 }
