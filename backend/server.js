@@ -39,7 +39,6 @@ const portfolioData = {
         { name: "React", slug: "react", color: "61DAFB" },
         { name: "Node.js", slug: "nodedotjs", color: "339933" },
         { name: "Express", slug: "express", color: "ffffff" },
-        { name: "CodeIgniter", slug: "codeigniter", color: "#EF4223" },
         { name: "Tailwind", slug: "tailwindcss", color: "06B6D4" }
       ]
     }, 

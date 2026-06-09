@@ -1,5 +1,9 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useLayoutEffect } from "react";
 import axios from "axios";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 // ─── ICONS (inline SVG) ───────────────────────────────────────────────────────
 const IconGithub = () => (
@@ -90,6 +94,18 @@ function AnimatedBackground() {
         .animate-fadeIn { animation: fadeIn 0.5s ease-out forwards; }
         .animation-delay-2000 { animation-delay: 2s; }
         .animation-delay-4000 { animation-delay: 4s; }
+
+        /* Scroll Transition Styles */
+        .fade-in-section {
+          opacity: 0;
+          transform: translateY(40px);
+          transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1), transform 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+          will-change: opacity, transform;
+        }
+        .fade-in-section.is-visible {
+          opacity: 1;
+          transform: translateY(0);
+        }
       `}</style>
       
       <div className="fixed inset-0 z-[-1] bg-[#070b14] overflow-hidden pointer-events-none">
@@ -227,8 +243,6 @@ function Hero({ data }) {
   const containerRef = useRef(null);
   const [rotation, setRotation] = useState({ x: 0, y: 0 });
 
-  const heroSkills = data.skillCategories.flatMap(c => c.items).slice(0, 7);
-
   const handleMouseMove = (e) => {
     if (!containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
@@ -316,11 +330,6 @@ function Hero({ data }) {
                 key={layer.id}
                 src={data.profileImage}
                 alt="Muhammad Mumtaaz"
-                /* Perbaikan CSS:
-                  - Menghapus rounded-2xl dan object-cover
-                  - Menggunakan max-w-none agar tidak terjepit grid
-                  - w-[110%] md:h-[125%] akan menskalakan gambar agar memanjang dari atas H1 ke bawah tombol CTA
-                */
                 className="absolute w-full h-[110%] md:h-[125%] max-w-none object-contain object-center pointer-events-none drop-shadow-2xl"
                 style={{
                   opacity: layer.opacity,
@@ -336,13 +345,36 @@ function Hero({ data }) {
   );
 }
 
-// ─── ABOUT (3D PARALLAX TILT + PERSISTENT STATE) ───────────────────────────
+// ─── ABOUT (GSAP HORIZONTAL REVEAL WITH PAUSE) ───────────────────────────
 function About({ data }) {
+  const sectionRef = useRef(null);
+  const contentRef = useRef(null);
+
+  useLayoutEffect(() => {
+    let ctx = gsap.context(() => {
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top top",
+          end: "+=150%", 
+          scrub: true,
+          pin: true,
+          anticipatePin: 1,
+        }
+      });
+
+      tl.fromTo(contentRef.current, 
+        { x: "-100%", opacity: 0 },
+        { x: "0%", opacity: 1, ease: "power2.out" }
+      )
+      .to({}, { duration: 0.5 }); 
+    }, sectionRef);
+    return () => ctx.revert();
+  }, []);
+
   return (
-    <section id="about" className="py-24 px-6 relative z-10 overflow-hidden">
-      <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-16 items-center">
-        
-        {/* Kolom Teks */}
+    <section ref={sectionRef} id="about" className="h-screen flex items-center bg-transparent overflow-hidden relative z-10">
+      <div ref={contentRef} className="max-w-6xl mx-auto px-6 w-full grid md:grid-cols-2 gap-16 items-center">
         <div>
           <SectionTitle label="Tentang Saya" title="The Journey" />
           <p className="text-slate-400 leading-relaxed mt-6">{data.about}</p>
@@ -360,8 +392,6 @@ function About({ data }) {
             ))}
           </div>
         </div>
-
-        {/* Kolom Kanan Dikosongkan Sesuai Permintaan */}
         <div className="hidden md:block"></div>
       </div>
     </section>
@@ -432,11 +462,36 @@ function SkillItem({ item }) {
   );
 }
 
-// ─── SKILLS (KARTU KATEGORI) ──────────────────────────────────────────────────
+// ─── SKILLS (GSAP HORIZONTAL REVEAL WITH PAUSE) ──────────────────────────────────────────────────
 function Skills({ data }) {
+  const sectionRef = useRef(null);
+  const contentRef = useRef(null);
+
+  useLayoutEffect(() => {
+    let ctx = gsap.context(() => {
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top top",
+          end: "+=150%", 
+          scrub: true,
+          pin: true,
+          anticipatePin: 1,
+        }
+      });
+
+      tl.fromTo(contentRef.current, 
+        { x: "100%", opacity: 0 },
+        { x: "0%", opacity: 1, ease: "power2.out" }
+      )
+      .to({}, { duration: 0.5 });
+    }, sectionRef);
+    return () => ctx.revert();
+  }, []);
+
   return (
-    <section id="skills" className="py-24 px-6 relative z-10">
-      <div className="max-w-6xl mx-auto">
+    <section ref={sectionRef} id="skills" className="h-screen flex items-center bg-transparent overflow-hidden relative z-10">
+      <div ref={contentRef} className="max-w-6xl mx-auto px-6 w-full">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-4">Tools & Technologies</h2>
           <p className="text-slate-400 text-sm md:text-base font-medium">Technologies I work with daily</p>
@@ -467,23 +522,47 @@ function Skills({ data }) {
   );
 }
 
-// ─── PROJECTS ─────────────────────────────────────────────────────────────────
+// ─── PROJECTS (GSAP HORIZONTAL REVEAL WITH VERTICAL SCROLL) ──────────────────────────────────────────────────
 function Projects({ data }) {
+  const sectionRef = useRef(null);
+  const contentRef = useRef(null);
+
+  useLayoutEffect(() => {
+    let ctx = gsap.context(() => {
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top top",
+          end: "+=120%", // Sedikit lebih pendek agar tidak terlalu lama mengunci sebelum bisa scroll ke bawah
+          scrub: true,
+          pin: true,
+          anticipatePin: 1,
+        }
+      });
+
+      tl.fromTo(contentRef.current, 
+        { x: "-100%", opacity: 0 },
+        { x: "0%", opacity: 1, ease: "power2.out" }
+      )
+      .to({}, { duration: 0.5 }); // Jeda diam sejenak di bagian atas proyek
+    }, sectionRef);
+    return () => ctx.revert();
+  }, []);
+
   return (
-    <section id="projects" className="py-24 px-6 relative z-10">
-      <div className="max-w-4xl mx-auto">
+    <section ref={sectionRef} id="projects" className="min-h-screen flex flex-col bg-transparent overflow-hidden relative z-10 pt-32 pb-24">
+      <div ref={contentRef} className="max-w-4xl mx-auto px-6 w-full">
         <SectionTitle label="Portofolio" title="Proyek Terbaru" />
         
         <div className="mt-16 flex flex-col gap-4">
           {data.projects.map((p) => (
             <div
               key={p.id}
-              className="group relative bg-[#0b1120]/90 backdrop-blur-md border border-slate-800/50 rounded-2xl overflow-hidden cursor-pointer
+              className="group relative bg-[#0b1120]/60 backdrop-blur-md border border-slate-800/50 rounded-2xl overflow-hidden cursor-pointer
                          transition-all duration-500 ease-in-out flex flex-col md:flex-row
                          hover:bg-[#0f172a]/95 hover:border-cyan-500/50 
                          hover:shadow-[0_0_50px_rgba(6,182,212,0.15)]"
             >
-              {/* Image Container - Slides in from left on hover */}
               <div className="w-full md:w-0 group-hover:md:w-72 h-48 md:h-auto transition-all duration-700 ease-in-out overflow-hidden relative border-r border-transparent group-hover:border-slate-800">
                 <img 
                   src={p.image} 
@@ -493,9 +572,7 @@ function Projects({ data }) {
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent to-[#0f172a]/40" />
               </div>
 
-              {/* Content Area */}
               <div className="flex-1 p-6 md:p-8 flex flex-col justify-center relative">
-                {/* Project Status & Role Tags (Top Right) */}
                 <div className="absolute top-6 right-6 flex gap-2 opacity-60 group-hover:opacity-100 transition-opacity">
                    <span className="px-2 py-0.5 text-[9px] font-bold uppercase tracking-tighter bg-slate-800 text-slate-400 border border-slate-700 rounded">
                     {p.role}
@@ -524,7 +601,6 @@ function Projects({ data }) {
                     {p.description}
                   </p>
 
-                  {/* Tags - Always visible */}
                   <div className="flex flex-wrap gap-2 mt-2">
                     {p.tags.map((t) => (
                       <span key={t} className="text-[10px] font-mono font-bold text-cyan-500/60 group-hover:text-cyan-400 transition-colors">
@@ -533,7 +609,6 @@ function Projects({ data }) {
                     ))}
                   </div>
                   
-                  {/* Detailed Description - Expanded on hover */}
                   <div className="max-h-0 opacity-0 group-hover:max-h-40 group-hover:opacity-100 transition-all duration-700 overflow-hidden">
                     <p className="text-slate-500 text-sm mt-4 border-l-2 border-cyan-500/30 pl-4 italic">
                       {p.longDescription}
@@ -541,7 +616,6 @@ function Projects({ data }) {
                   </div>
                 </div>
 
-                {/* Action Icons - Moved to Bottom Right */}
                 <div className="absolute bottom-6 right-6 flex gap-4 opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-4 group-hover:translate-y-0">
                   <a href={p.repo} target="_blank" rel="noreferrer" className="text-slate-500 hover:text-white transition-all hover:scale-110">
                     <IconGithub />
@@ -552,7 +626,6 @@ function Projects({ data }) {
                 </div>
               </div>
 
-              {/* Decorative side accent */}
               <div className="absolute left-0 top-0 bottom-0 w-1 bg-cyan-500 transform scale-y-0 group-hover:scale-y-100 transition-transform duration-500 origin-top" />
             </div>
           ))}
@@ -562,11 +635,36 @@ function Projects({ data }) {
   );
 }
 
-// ─── CONTACT ──────────────────────────────────────────────────────────────────
+// ─── CONTACT (GSAP HORIZONTAL REVEAL WITH PAUSE) ──────────────────────────────────────────────────
 function Contact({ data }) {
+  const sectionRef = useRef(null);
+  const contentRef = useRef(null);
+
+  useLayoutEffect(() => {
+    let ctx = gsap.context(() => {
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top top",
+          end: "+=120%", 
+          scrub: true,
+          pin: true,
+          anticipatePin: 1,
+        }
+      });
+
+      tl.fromTo(contentRef.current, 
+        { x: "100%", opacity: 0 },
+        { x: "0%", opacity: 1, ease: "power2.out" }
+      )
+      .to({}, { duration: 0.5 });
+    }, sectionRef);
+    return () => ctx.revert();
+  }, []);
+
   return (
-    <section id="contact" className="py-24 px-6 relative z-10">
-      <div className="max-w-2xl mx-auto text-center">
+    <section ref={sectionRef} id="contact" className="h-screen flex items-center bg-transparent overflow-hidden relative z-10">
+      <div ref={contentRef} className="max-w-2xl mx-auto text-center px-6 w-full">
         <SectionTitle label="Kontak" title="Hubungi Saya" center />
         <p className="text-slate-400 mt-4 leading-relaxed">
           Punya proyek menarik atau ingin berkolaborasi? Jangan ragu untuk menghubungi saya. Saya selalu terbuka untuk diskusi baru!
@@ -657,33 +755,23 @@ function FadeInSection({ children }) {
 // ─── APP ──────────────────────────────────────────────────────────────────────
 export default function App() {
   const [portfolioData, setPortfolioData] = useState(null);
-  
-  // Manajemen urutan waktu: 
-  // 0: Loading (Infinity dengan Cahaya Bergerak), 1: Morph ke Garis, 2: Slide Out Kanan, 3: Hilang
   const [phase, setPhase] = useState(0); 
 
   useEffect(() => {
     const startTime = Date.now();
-
     axios.get("http://localhost:8080/")
       .then((response) => {
         setPortfolioData(response.data);
-        
         const elapsedTime = Date.now() - startTime;
         const remainingTime = Math.max(0, 2000 - elapsedTime);
-
         setTimeout(() => {
-          setPhase(1); // Trigger morphing ke garis lurus
-          
+          setPhase(1); 
           setTimeout(() => {
-            setPhase(2); // Trigger slide out
-            
+            setPhase(2); 
             setTimeout(() => {
-              setPhase(3); // Unmount permanen
+              setPhase(3); 
             }, 800);
-            
-          }, 1200); // 700ms morphing + 500ms jeda diam
-          
+          }, 1200); 
         }, remainingTime);
       })
       .catch((error) => {
@@ -693,19 +781,16 @@ export default function App() {
 
   return (
     <>
-      {/* ─── INJEKSI CSS ANIMASI CAHAYA ─── */}
       <style>{`
         @keyframes trace-light {
           0% { stroke-dashoffset: 100; }
           100% { stroke-dashoffset: 0; }
         }
         .animate-trace {
-          /* Panjang 'cahaya' 25 unit, area kosong 75 unit */
           stroke-dasharray: 25 75; 
           animation: trace-light 1.5s linear infinite;
         }
 
-        /* Scroll Transition Styles */
         .fade-in-section {
           opacity: 0;
           transform: translateY(40px);
@@ -718,79 +803,31 @@ export default function App() {
         }
       `}</style>
 
-      {/* ─── LAYER 1: LOADING SCREEN OVERLAY ─── */}
       {phase < 3 && (
-        <div 
-          className={`fixed inset-0 z-[100] bg-[#070b14] flex items-center justify-center overflow-hidden transition-transform duration-[800ms] ease-in-out ${
-            phase >= 2 ? "translate-x-full" : "translate-x-0"
-          }`}
-        >
-          {/* Kontainer Morphing */}
-          <div 
-            className={`transition-all duration-[700ms] ease-in-out flex items-center justify-center overflow-hidden ${
-              phase === 0 
-                ? "w-32 h-32 bg-transparent" 
-                : "w-[100vw] h-1 bg-cyan-500 shadow-[0_0_20px_rgba(6,182,212,1)]"
-            }`}
-          >
-            {/* SVG Logo Infinity */}
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className={`transition-all duration-[700ms] ease-in-out ${
-                phase === 0 
-                  ? "w-24 h-24 opacity-100 scale-100" 
-                  : "w-24 h-0 opacity-0 scale-y-0"
-              }`}
-            >
-              {/* Jalur 1: Rel Lintasan (Warna gelap statis) */}
-              <path 
-                d="M12 12c-2-2.67-4-4-6-4a4 4 0 1 0 0 8c2 0 4-1.33 6-4zm0 0c2 2.67 4 4 6 4a4 4 0 1 0 0-8c-2 0-4 1.33-6 4z" 
-                stroke="currentColor" 
-                className="text-cyan-950" 
-              />
-              
-              {/* Jalur 2: Cahaya Bergerak (Warna terang + Animasi dashoffset) */}
-              <path 
-                d="M12 12c-2-2.67-4-4-6-4a4 4 0 1 0 0 8c2 0 4-1.33 6-4zm0 0c2 2.67 4 4 6 4a4 4 0 1 0 0-8c-2 0-4 1.33-6 4z" 
-                stroke="currentColor" 
-                pathLength="100" 
-                className="text-cyan-400 drop-shadow-[0_0_10px_rgba(6,182,212,0.9)] animate-trace" 
-              />
+        <div className={`fixed inset-0 z-[100] bg-[#070b14] flex items-center justify-center overflow-hidden transition-transform duration-[800ms] ease-in-out ${phase >= 2 ? "translate-x-full" : "translate-x-0"}`}>
+          <div className={`transition-all duration-[700ms] ease-in-out flex items-center justify-center overflow-hidden ${phase === 0 ? "w-32 h-32 bg-transparent" : "w-[100vw] h-1 bg-cyan-500 shadow-[0_0_20px_rgba(6,182,212,1)]"}`}>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={`transition-all duration-[700ms] ease-in-out ${phase === 0 ? "w-24 h-24 opacity-100 scale-100" : "w-24 h-0 opacity-0 scale-y-0"}`}>
+              <path d="M12 12c-2-2.67-4-4-6-4a4 4 0 1 0 0 8c2 0 4-1.33 6-4zm0 0c2 2.67 4 4 6 4a4 4 0 1 0 0-8c-2 0-4 1.33-6 4z" stroke="currentColor" className="text-cyan-950" />
+              <path d="M12 12c-2-2.67-4-4-6-4a4 4 0 1 0 0 8c2 0 4-1.33 6-4zm0 0c2 2.67 4 4 6 4a4 4 0 1 0 0-8c-2 0-4 1.33-6 4z" stroke="currentColor" pathLength="100" className="text-cyan-400 drop-shadow-[0_0_10px_rgba(6,182,212,0.9)] animate-trace" />
             </svg>
           </div>
         </div>
       )}
 
-      {/* ─── LAYER 2: MAIN APP CONTENT ─── */}
       {portfolioData ? (
         <div className="min-h-screen text-white relative">
           <AnimatedBackground />
           <Navbar data={portfolioData} />
           
-          <FadeInSection>
-            <Hero data={portfolioData} />
-          </FadeInSection>
+          <Hero data={portfolioData} />
 
-          <FadeInSection>
-            <About data={portfolioData} />
-          </FadeInSection>
+          <About data={portfolioData} />
 
-          <FadeInSection>
-            <Skills data={portfolioData} />
-          </FadeInSection>
+          <Skills data={portfolioData} />
 
-          <FadeInSection>
-            <Projects data={portfolioData} />
-          </FadeInSection>
+          <Projects data={portfolioData} />
 
-          <FadeInSection>
-            <Contact data={portfolioData} />
-          </FadeInSection>
+          <Contact data={portfolioData} />
           
           <Footer data={portfolioData} />
         </div>
