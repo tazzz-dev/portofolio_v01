@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef, useLayoutEffect } from "react";
 import axios from "axios";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { ScrollToPlugin } from "gsap/ScrollToPlugin";
 
-gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
 // ─── ICONS (inline SVG) ───────────────────────────────────────────────────────
 const IconGithub = () => (
@@ -176,7 +177,7 @@ function Navbar({ data }) {
   const [scrolled, setScrolled] = useState(false);
   
   // Menghapus 'Experience' dari Navigation links
-  const navLinks = ["About", "Skills", "Projects", "Contact"];
+  const navLinks = ["About", "Tools", "Projects", "Contact"];
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 20);
@@ -185,7 +186,20 @@ function Navbar({ data }) {
   }, []);
 
   const scrollTo = (id) => {
-    document.getElementById(id.toLowerCase())?.scrollIntoView({ behavior: "smooth" });
+    const targetId = id.toLowerCase();
+    const element = document.getElementById(targetId);
+    
+    if (element) {
+      // Adjusted offset to 80% of viewport height for deeper entry
+      // This ensures animations are fully settled and the next scroll moves quickly.
+      const offset = window.innerHeight * 0.8; 
+      
+      gsap.to(window, {
+        scrollTo: { y: element, offsetY: -offset },
+        duration: 1.5,
+        ease: "power4.out"
+      });
+    }
     setOpen(false);
   };
 
@@ -280,20 +294,26 @@ function Hero({ data }) {
             <Typewriter words={data.roles} />
           </h2>
           
-          <p className="text-slate-400 max-w-lg leading-relaxed text-lg">
+          <p className="text-slate-400 max-w-2xl leading-relaxed text-lg">
             {data.about}
           </p>
 
           
           <div className="flex gap-4 pt-4">
             <button
-              onClick={() => document.getElementById("projects")?.scrollIntoView({ behavior: "smooth" })}
+              onClick={() => {
+                const el = document.getElementById("projects");
+                if (el) gsap.to(window, { scrollTo: { y: el, offsetY: -window.innerHeight * 0.8 }, duration: 1.5, ease: "power4.out" });
+              }}
               className="px-6 py-3 bg-cyan-500 hover:bg-cyan-400 text-[#070b14] text-sm font-bold rounded-lg transition-all duration-200 hover:shadow-lg hover:shadow-cyan-500/30 active:scale-95"
             >
               View My Projects
             </button>
             <button
-              onClick={() => document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })}
+              onClick={() => {
+                const el = document.getElementById("contact");
+                if (el) gsap.to(window, { scrollTo: { y: el, offsetY: -window.innerHeight * 0.8 }, duration: 1.5, ease: "power4.out" });
+              }}
               className="px-6 py-3 border border-slate-600 hover:border-cyan-500 text-slate-300 hover:text-cyan-400 text-sm font-semibold rounded-lg transition-all duration-200 backdrop-blur-sm"
             >
               Let's Connect
@@ -441,7 +461,7 @@ function ScrambleText({ text, trigger }) {
   return <span>{display}</span>;
 }
 
-function SkillItem({ item }) {
+function ToolItem({ item }) {
   const [hovered, setHovered] = useState(false);
 
   return (
@@ -462,8 +482,8 @@ function SkillItem({ item }) {
   );
 }
 
-// ─── SKILLS (GSAP HORIZONTAL REVEAL WITH PAUSE) ──────────────────────────────────────────────────
-function Skills({ data }) {
+// ─── TOOLS (GSAP HORIZONTAL REVEAL WITH PAUSE) ──────────────────────────────────────────────────
+function Tools({ data }) {
   const sectionRef = useRef(null);
   const contentRef = useRef(null);
 
@@ -490,7 +510,7 @@ function Skills({ data }) {
   }, []);
 
   return (
-    <section ref={sectionRef} id="skills" className="h-screen flex items-center bg-transparent overflow-hidden relative z-10">
+    <section ref={sectionRef} id="tools" className="h-screen flex items-center bg-transparent overflow-hidden relative z-10">
       <div ref={contentRef} className="max-w-6xl mx-auto px-6 w-full">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-4">Tools & Technologies</h2>
@@ -511,7 +531,7 @@ function Skills({ data }) {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 gap-3">
                 {category.items.map((item, i) => (
-                <SkillItem key={i} item={item} />
+                <ToolItem key={i} item={item} />
                 ))}
               </div>
             </div>
@@ -665,16 +685,16 @@ function Contact({ data }) {
   return (
     <section ref={sectionRef} id="contact" className="h-screen flex items-center bg-transparent overflow-hidden relative z-10">
       <div ref={contentRef} className="max-w-2xl mx-auto text-center px-6 w-full">
-        <SectionTitle label="Kontak" title="Hubungi Saya" center />
+        <SectionTitle label="Contact" title="Get in Touch" center />
         <p className="text-slate-400 mt-4 leading-relaxed">
-          Punya proyek menarik atau ingin berkolaborasi? Jangan ragu untuk menghubungi saya. Saya selalu terbuka untuk diskusi baru!
+          Have an interesting project or want to collaborate? Feel free to reach out. I'm always open to new discussions!
         </p>
         <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
           <a
             href={`mailto:${data.email}`}
             className="flex items-center gap-2 px-6 py-3 bg-cyan-500 hover:bg-cyan-400 text-[#070b14] font-bold rounded-lg transition-all hover:shadow-lg hover:shadow-cyan-500/30"
           >
-            <IconMail /> Kirim Email
+            <IconMail /> Email
           </a>
           <a
             href={data.linkedin}
@@ -703,7 +723,7 @@ function Footer({ data }) {
   return (
     <footer className="py-8 px-6 border-t border-slate-800/50 text-center text-slate-500 text-sm relative z-10 backdrop-blur-sm bg-black/10">
       <p>
-        Dibuat oleh{" "}
+        Built by{" "}
         <span className="text-cyan-400 font-medium">{data.heroName}</span> · {new Date().getFullYear()}
       </p>
     </footer>
@@ -823,7 +843,7 @@ export default function App() {
 
           <About data={portfolioData} />
 
-          <Skills data={portfolioData} />
+          <Tools data={portfolioData} />
 
           <Projects data={portfolioData} />
 

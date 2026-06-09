@@ -14,7 +14,7 @@ const portfolioData = {
     "Game Developer", 
     "Robotics Enthusiast"
   ],
-  about: "I build things — for the web, for games, and for the real world...",
+  about: "I explore what exists, imagine what doesn't, and build what's next.",
   email: "mumtaazraihaan@gmail.com",
   github: "https://github.com/tazzz-dev",
   linkedin: "https://linkedin.com/in/muhammadmumtaaz",
