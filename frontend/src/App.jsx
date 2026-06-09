@@ -81,8 +81,13 @@ function AnimatedBackground() {
           66% { transform: translate(-20px, 20px) scale(0.9); }
           100% { transform: translate(0px, 0px) scale(1); }
         }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
         .animate-grid { animation: moveGrid 3s linear infinite; }
         .animate-blob { animation: blob 10s infinite; }
+        .animate-fadeIn { animation: fadeIn 0.5s ease-out forwards; }
         .animation-delay-2000 { animation-delay: 2s; }
         .animation-delay-4000 { animation-delay: 4s; }
       `}</style>
@@ -466,35 +471,86 @@ function Skills({ data }) {
 function Projects({ data }) {
   return (
     <section id="projects" className="py-24 px-6 relative z-10">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-4xl mx-auto">
         <SectionTitle label="Portofolio" title="Proyek Terbaru" />
-        <div className="grid md:grid-cols-2 gap-6 mt-10">
+        
+        <div className="mt-16 flex flex-col gap-4">
           {data.projects.map((p) => (
             <div
               key={p.id}
-              className="group bg-[#0b1120]/60 backdrop-blur-md border border-slate-800/50 hover:border-cyan-500/40 rounded-xl p-6 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/10"
+              className="group relative bg-[#0b1120]/40 backdrop-blur-md border border-slate-800/50 rounded-2xl overflow-hidden cursor-pointer
+                         transition-all duration-500 ease-in-out flex flex-col md:flex-row
+                         hover:bg-[#0f172a]/90 hover:border-cyan-500/50 
+                         hover:shadow-[0_0_50px_rgba(6,182,212,0.15)]"
             >
-              <div className="flex justify-between items-start mb-3">
-                <h3 className="text-lg font-bold text-white group-hover:text-cyan-400 transition-colors">
-                  {p.title}
-                </h3>
-                <div className="flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <a href={p.repo} target="_blank" rel="noreferrer" className="text-slate-400 hover:text-white">
+              {/* Image Container - Slides in from left on hover */}
+              <div className="w-full md:w-0 group-hover:md:w-72 h-48 md:h-auto transition-all duration-700 ease-in-out overflow-hidden relative border-r border-transparent group-hover:border-slate-800">
+                <img 
+                  src={p.image} 
+                  alt={p.title} 
+                  className="w-full h-full object-cover transform scale-110 group-hover:scale-100 transition-transform duration-1000"
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent to-[#0f172a]/40" />
+              </div>
+
+              {/* Content Area */}
+              <div className="flex-1 p-6 md:p-8 flex flex-col justify-center relative">
+                {/* Project Status & Role Tags (Top Right) */}
+                <div className="absolute top-6 right-6 flex gap-2 opacity-60 group-hover:opacity-100 transition-opacity">
+                   <span className="px-2 py-0.5 text-[9px] font-bold uppercase tracking-tighter bg-slate-800 text-slate-400 border border-slate-700 rounded">
+                    {p.role}
+                  </span>
+                  <span className={`px-2 py-0.5 text-[9px] font-bold uppercase tracking-tighter rounded border ${
+                    p.status === "Completed" 
+                      ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" 
+                      : "bg-amber-500/10 text-amber-500 border-amber-500/20"
+                  }`}>
+                    {p.status}
+                  </span>
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-4">
+                    <h3 className="text-2xl font-black text-white group-hover:text-cyan-400 transition-colors">
+                      {p.title}
+                    </h3>
+                    <div className="h-[1px] flex-1 bg-slate-800 group-hover:bg-cyan-900/50 transition-colors hidden md:block" />
+                  </div>
+
+                  <p className="text-slate-400 text-sm md:text-base leading-relaxed max-w-2xl">
+                    {p.description}
+                  </p>
+
+                  {/* Tags - Always visible */}
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {p.tags.map((t) => (
+                      <span key={t} className="text-[10px] font-mono font-bold text-cyan-500/60 group-hover:text-cyan-400 transition-colors">
+                        #{t}
+                      </span>
+                    ))}
+                  </div>
+                  
+                  {/* Detailed Description - Expanded on hover */}
+                  <div className="max-h-0 opacity-0 group-hover:max-h-40 group-hover:opacity-100 transition-all duration-700 overflow-hidden">
+                    <p className="text-slate-500 text-sm mt-4 border-l-2 border-cyan-500/30 pl-4 italic">
+                      {p.longDescription}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Action Icons - Moved to Bottom Right */}
+                <div className="absolute bottom-6 right-6 flex gap-4 opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-4 group-hover:translate-y-0">
+                  <a href={p.repo} target="_blank" rel="noreferrer" className="text-slate-500 hover:text-white transition-all hover:scale-110">
                     <IconGithub />
                   </a>
-                  <a href={p.link} target="_blank" rel="noreferrer" className="text-slate-400 hover:text-cyan-400">
+                  <a href={p.link} target="_blank" rel="noreferrer" className="text-slate-500 hover:text-cyan-400 transition-all hover:scale-110">
                     <IconExternal />
                   </a>
                 </div>
               </div>
-              <p className="text-slate-400 text-sm leading-relaxed mb-4">{p.description}</p>
-              <div className="flex flex-wrap gap-2">
-                {p.tags.map((t) => (
-                  <span key={t} className="px-2 py-0.5 text-xs font-mono text-cyan-400 bg-cyan-500/10 rounded">
-                    {t}
-                  </span>
-                ))}
-              </div>
+
+              {/* Decorative side accent */}
+              <div className="absolute left-0 top-0 bottom-0 w-1 bg-cyan-500 transform scale-y-0 group-hover:scale-y-100 transition-transform duration-500 origin-top" />
             </div>
           ))}
         </div>
@@ -569,11 +625,10 @@ export default function App() {
   const [portfolioData, setPortfolioData] = useState(null);
   
   // Manajemen urutan waktu: 
-  // 0: Loading (Infinity), 1: Morph ke Garis, 2: Slide Out Kanan, 3: Hilang
+  // 0: Loading (Infinity dengan Cahaya Bergerak), 1: Morph ke Garis, 2: Slide Out Kanan, 3: Hilang
   const [phase, setPhase] = useState(0); 
 
   useEffect(() => {
-    // Catat waktu eksekusi agar kalkulasi minimum 2 detik presisi
     const startTime = Date.now();
 
     axios.get("http://localhost:8080/")
@@ -583,22 +638,17 @@ export default function App() {
         const elapsedTime = Date.now() - startTime;
         const remainingTime = Math.max(0, 2000 - elapsedTime);
 
-        // Setelah minimal 2 detik...
         setTimeout(() => {
-          setPhase(1); // Trigger transisi menjadi garis lurus
+          setPhase(1); // Trigger morphing ke garis lurus
           
-          // Durasi animasi garis membentuk adalah 700ms. 
-          // Anda minta jeda setengah detik (500ms) SETELAH garis jadi.
-          // Total menunggu = 700ms + 500ms = 1200ms.
           setTimeout(() => {
-            setPhase(2); // Trigger layar berpindah ke sisi kanan
+            setPhase(2); // Trigger slide out
             
-            // Tunggu animasi slide-out selesai sebelum menghapus dari DOM
             setTimeout(() => {
-              setPhase(3); 
-            }, 800); // 800ms sinkron dengan durasi transisi slide-out CSS
+              setPhase(3); // Unmount permanen
+            }, 800);
             
-          }, 1200); 
+          }, 1200); // 700ms morphing + 500ms jeda diam
           
         }, remainingTime);
       })
@@ -609,6 +659,19 @@ export default function App() {
 
   return (
     <>
+      {/* ─── INJEKSI CSS ANIMASI CAHAYA ─── */}
+      <style>{`
+        @keyframes trace-light {
+          0% { stroke-dashoffset: 100; }
+          100% { stroke-dashoffset: 0; }
+        }
+        .animate-trace {
+          /* Panjang 'cahaya' 25 unit, area kosong 75 unit */
+          stroke-dasharray: 25 75; 
+          animation: trace-light 1.5s linear infinite;
+        }
+      `}</style>
+
       {/* ─── LAYER 1: LOADING SCREEN OVERLAY ─── */}
       {phase < 3 && (
         <div 
@@ -616,7 +679,7 @@ export default function App() {
             phase >= 2 ? "translate-x-full" : "translate-x-0"
           }`}
         >
-          {/* Kontainer Morphing: Dari kotak pembungkus logo menjadi Garis Lurus */}
+          {/* Kontainer Morphing */}
           <div 
             className={`transition-all duration-[700ms] ease-in-out flex items-center justify-center overflow-hidden ${
               phase === 0 
@@ -629,18 +692,29 @@ export default function App() {
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="currentColor"
               strokeWidth="1.5"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className={`text-cyan-400 drop-shadow-[0_0_10px_rgba(6,182,212,0.8)] transition-all duration-[700ms] ease-in-out ${
+              className={`transition-all duration-[700ms] ease-in-out ${
                 phase === 0 
-                  ? "w-24 h-24 opacity-100 scale-100 animate-pulse" 
+                  ? "w-24 h-24 opacity-100 scale-100" 
                   : "w-24 h-0 opacity-0 scale-y-0"
               }`}
             >
-              {/* Path yang menggambar bentuk Infinity (Angka 8 tertidur) */}
-              <path d="M12 12c-2-2.67-4-4-6-4a4 4 0 1 0 0 8c2 0 4-1.33 6-4zm0 0c2 2.67 4 4 6 4a4 4 0 1 0 0-8c-2 0-4 1.33-6 4z" />
+              {/* Jalur 1: Rel Lintasan (Warna gelap statis) */}
+              <path 
+                d="M12 12c-2-2.67-4-4-6-4a4 4 0 1 0 0 8c2 0 4-1.33 6-4zm0 0c2 2.67 4 4 6 4a4 4 0 1 0 0-8c-2 0-4 1.33-6 4z" 
+                stroke="currentColor" 
+                className="text-cyan-950" 
+              />
+              
+              {/* Jalur 2: Cahaya Bergerak (Warna terang + Animasi dashoffset) */}
+              <path 
+                d="M12 12c-2-2.67-4-4-6-4a4 4 0 1 0 0 8c2 0 4-1.33 6-4zm0 0c2 2.67 4 4 6 4a4 4 0 1 0 0-8c-2 0-4 1.33-6 4z" 
+                stroke="currentColor" 
+                pathLength="100" 
+                className="text-cyan-400 drop-shadow-[0_0_10px_rgba(6,182,212,0.9)] animate-trace" 
+              />
             </svg>
           </div>
         </div>
