@@ -21,26 +21,26 @@ const portfolioData = {
   profileImage: "/foto-saya.png",
   
   aboutImages: [
-    "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=400",
-    "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80&w=400",
-    "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=400"
+    "/Journey1.jpg",
+    "/Journey2.jpg",
+    "/Journey3.jpg"
   ],
 
   timeline: [
     {
-      year: "2023",
-      title: "Exploration Phase",
-      desc: "Delved into specialized tech stacks and began integrating hardware with intelligent software solutions."
+      year: "2021",
+      title: "The Genesis",
+      desc: "Memulai langkah awal di dunia rekayasa web dengan mempelajari fondasi struktur dan tata letak antarmuka digital menggunakan HTML5 dan CSS3 dasar."
     },
     {
       year: "2024",
-      title: "Professional Growth",
-      desc: "Focused on building scalable applications and mastering modern fullstack architectures."
+      title: "Academic Foundation",
+      desc: "Memasuki bangku kuliah tingkat awal dan memperkuat pemahaman fundamental pemrograman lewat bahasa C, manajemen basis data relasional (MySQL), serta logika dasar ilmu komputer."
     },
     {
-      year: "2025",
-      title: "Future Frontiers",
-      desc: "Pushing the boundaries of digital experiences with a focus on robotics and immersive web art."
+      year: "2025 - present",
+      title: "Modern Tech Stack",
+      desc: "Berfokus pada pengembangan aplikasi modern dengan menguasai ekosistem JavaScript (React.js & Node.js), manajemen repositori (Git), serta arsitektur full-stack yang skalabel."
     }
   ],
 
@@ -139,7 +139,7 @@ const portfolioData = {
       description: "Platform aksi sosial untuk manajemen relawan.",
       longDescription: "Platform komprehensif yang dirancang untuk memfasilitasi organisasi sosial dalam mengelola relawan, kampanye donasi, dan pelaporan dampak secara transparan.",
       image: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&q=80&w=800",
-      status: "In Development",
+      status: "Completed",
       role: "Lead Developer",
       tags: ["CodeIgniter 3", "Bootstrap", "MySQL"],
       link: "#",

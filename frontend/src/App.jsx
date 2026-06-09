@@ -461,32 +461,6 @@ function JourneyTimeline({ timeline }) {
   const [scrollProgress, setScrollProgress] = useState(0);
 
   useEffect(() => {
-    // We listen to the ScrollTrigger of the #about section
-    const st = ScrollTrigger.getById("aboutTrigger");
-    if (!st) return;
-
-    const updateTimeline = () => {
-      setScrollProgress(st.progress);
-      // Map progress (0 to 1) to active steps (0 to 2)
-      // We want it to light up as the user scrolls through the pinning duration
-      if (st.progress < 0.1) setActiveStep(null);
-      else if (st.progress < 0.4) setActiveStep(0);
-      else if (st.progress < 0.7) setActiveStep(1);
-      else setActiveStep(2);
-    };
-
-    // Add listener to the existing ScrollTrigger
-    st.header = updateTimeline; // Custom property to hook into onUpdate
-    
-    // Actually, it's better to find the trigger and add an onUpdate listener if possible, 
-    // or use a dedicated effect that watches the about trigger.
-    // For simplicity and reliability in this setup, let's use a refresh/update loop or 
-    // ensure the About component passes progress down.
-  }, []);
-
-  // For absolute reliability, let's use a dedicated ScrollTrigger inside the component 
-  // that matches the #about section's timing.
-  useEffect(() => {
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: "#about",
@@ -495,7 +469,6 @@ function JourneyTimeline({ timeline }) {
         scrub: true,
         onUpdate: (self) => {
           setScrollProgress(self.progress);
-          // Added more 'dead zone' at the start (0.25) so it stays dark for a bit after pinning
           if (self.progress < 0.25) setActiveStep(null);
           else if (self.progress < 0.50) setActiveStep(0);
           else if (self.progress < 0.75) setActiveStep(1);
@@ -507,9 +480,9 @@ function JourneyTimeline({ timeline }) {
   }, []);
 
   return (
-    <div className="relative flex flex-col gap-6 pl-10 py-2">
-      {/* 1. Garis Konektor Neon Dinamis (Berdasarkan Scroll) */}
-      <div className="absolute left-[8px] top-6 bottom-6 w-[2px] bg-slate-800 rounded-full overflow-hidden">
+    <div className="relative flex flex-col gap-5 pl-10">
+      {/* 1. Garis Konektor Neon Dinamis */}
+      <div className="absolute left-[8px] top-12 bottom-12 w-[2px] bg-slate-800 rounded-full overflow-hidden">
         <div 
           className="w-full bg-gradient-to-b from-cyan-400 to-blue-600 shadow-[0_0_15px_rgba(34,211,238,0.5)] transition-all duration-300 ease-out"
           style={{ height: `${scrollProgress * 100}%` }}
@@ -519,35 +492,31 @@ function JourneyTimeline({ timeline }) {
       {timeline.slice(0, 3).map((item, index) => {
         const isActive = activeStep === index;
         return (
-          <div key={index} className="relative">
-            {/* 2. Node Titik Indikator - Aligned with the center of the card */}
+          <div key={index} className="relative group/item">
             <div 
               className={`absolute left-[-40px] top-1/2 -translate-y-1/2 w-4 h-4 rounded-full border-2 transition-all duration-500 z-10
                 ${isActive 
                   ? "bg-cyan-400 border-cyan-300 scale-125 shadow-[0_0_15px_rgba(34,211,238,0.8)]" 
-                  : "bg-[#070b14] border-slate-700 scale-100"
+                  : "bg-[#070b14] border-slate-700 scale-100 group-hover/item:border-cyan-500/50"
                 }`}
             >
-              {isActive && (
-                <div className="absolute inset-0 rounded-full animate-ping bg-cyan-400/40" />
-              )}
+              {isActive && <div className="absolute inset-0 rounded-full animate-ping bg-cyan-400/40" />}
             </div>
 
-            {/* 3. Kotak Konten Berbasis Kondisi (Scroll) */}
             <div 
               className={`p-5 rounded-xl border transition-all duration-500 backdrop-blur-md cursor-default
                 ${isActive 
-                  ? "bg-cyan-500/10 border-cyan-500/50 shadow-[0_0_25px_rgba(6,182,212,0.15)] translate-x-2" 
-                  : "bg-[#0b1120]/20 border-slate-800/30 opacity-70"
+                  ? "bg-[#0b1120] border-cyan-500/50 shadow-[0_0_30px_rgba(6,182,212,0.2)] translate-x-2 opacity-100" 
+                  : "bg-[#0b1120]/60 border-slate-800/30 opacity-100 hover:bg-[#0b1120]/80 hover:border-cyan-500/30 hover:shadow-[0_0_20px_rgba(6,182,212,0.1)] hover:translate-x-1"
                 }`}
             >
-              <span className={`text-[10px] font-mono font-bold tracking-widest uppercase transition-colors duration-500 ${isActive ? "text-cyan-400" : "text-slate-600"}`}>
+              <span className={`text-[10px] font-mono font-bold tracking-widest uppercase transition-colors duration-500 ${isActive ? "text-cyan-400" : "text-slate-600 group-hover/item:text-cyan-500/70"}`}>
                 {item.year}
               </span>
-              <h4 className={`text-base font-bold mt-0.5 transition-colors duration-500 ${isActive ? "text-white" : "text-slate-400"}`}>
+              <h4 className={`text-base font-bold mt-0.5 transition-colors duration-500 ${isActive ? "text-white" : "text-slate-400 group-hover/item:text-white"}`}>
                 {item.title}
               </h4>
-              <p className={`text-xs leading-relaxed mt-1.5 transition-colors duration-500 ${isActive ? "text-slate-300" : "text-slate-500"}`}>
+              <p className={`text-xs leading-relaxed mt-1.5 transition-colors duration-500 ${isActive ? "text-slate-300" : "text-slate-500 group-hover/item:text-slate-300"}`}>
                 {item.desc}
               </p>
             </div>
@@ -587,31 +556,41 @@ function About({ data }) {
 
   return (
     <section ref={sectionRef} id="about" className="h-screen flex items-center bg-transparent overflow-hidden relative z-10">
-      <div ref={contentRef} className="max-w-6xl mx-auto px-6 w-full grid md:grid-cols-2 gap-16 items-center">
-        <div>
-          <SectionTitle label="Tentang Saya" title="The Journey" />
-          <p className="text-slate-400 leading-relaxed mt-6">{data.about}</p>
-          
-          {/* Image Grid Placeholder - Bento Style */}
-          <div className="grid grid-cols-3 gap-3 mt-8 h-48">
-            <div className="col-span-2 rounded-2xl overflow-hidden border border-slate-800/50 group">
-              <img src={data.aboutImages?.[0]} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 scale-110 group-hover:scale-100" />
-            </div>
-            <div className="flex flex-col gap-3">
-              <div className="h-1/2 rounded-2xl overflow-hidden border border-slate-800/50 group">
-                <img src={data.aboutImages?.[1]} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 scale-110 group-hover:scale-100" />
-              </div>
-              <div className="h-1/2 rounded-2xl overflow-hidden border border-slate-800/50 group">
-                <img src={data.aboutImages?.[2]} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 scale-110 group-hover:scale-100" />
-              </div>
-            </div>
+      <div ref={contentRef} className="max-w-6xl mx-auto px-6 w-full flex flex-col">
+  
+  {/* Bottom Part: Grid for Images and Timeline */}
+  <div className="grid md:grid-cols-2 gap-16 items-end">
+    
+    {/* Left: Pindahkan Title ke Sini dan bungkus dengan Image Grid */}
+    <div className="flex flex-col gap-6"> 
+      {/* Header container sekarang di atas foto persis */}
+      <div className="max-w-2xl">
+        <SectionTitle label="Tentang Saya" title="The Journey" />
+        <p className="text-slate-400 leading-relaxed mt-2 text-sm">{data.about}</p>
+      </div>
+
+      {/* Left: Image Grid */}
+      <div className="grid grid-cols-3 gap-3 h-80">
+        <div className="col-span-2 rounded-2xl overflow-hidden border border-slate-800/50 group">
+          <img src={data.aboutImages?.[0]} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 scale-110 group-hover:scale-100" />
+        </div>
+        <div className="flex flex-col gap-3">
+          <div className="h-1/2 rounded-2xl overflow-hidden border border-slate-800/50 group">
+            <img src={data.aboutImages?.[1]} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 scale-110 group-hover:scale-100" />
+          </div>
+          <div className="h-1/2 rounded-2xl overflow-hidden border border-slate-800/50 group">
+            <img src={data.aboutImages?.[2]} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 scale-110 group-hover:scale-100" />
           </div>
         </div>
-        
-        <div className="hidden md:block py-6 px-4">
-           {data.timeline && <JourneyTimeline timeline={data.timeline} />}
-        </div>
       </div>
+    </div>
+    
+    {/* Right: Journey Timeline */}
+    <div className="hidden md:block">
+       {data.timeline && <JourneyTimeline timeline={data.timeline} />}
+    </div>
+  </div>
+</div>
     </section>
   );
 }
@@ -718,8 +697,12 @@ function Tools({ data }) {
 
         <div className="grid md:grid-cols-3 gap-6">
           {data.skillCategories.map((category, idx) => (
-            <div key={idx} className="bg-[#0b1120]/80 backdrop-blur-md border border-slate-800/80 rounded-3xl p-6 md:p-8 flex flex-col gap-6 shadow-2xl">
-              <div className="flex items-center gap-3 border-b border-slate-800/50 pb-4">
+            <div 
+              key={idx} 
+              className="bg-[#0b1120]/80 backdrop-blur-md border border-slate-800/80 rounded-3xl p-6 md:p-8 flex flex-col gap-6 shadow-2xl transition-all duration-500 
+                         hover:bg-[#0b1120]/95 hover:border-cyan-500/50 hover:shadow-[0_0_40px_rgba(6,182,212,0.15)] hover:-translate-y-1"
+            >
+              <div className="flex items-center gap-3 border-b border-slate-800/50 pb-4 transition-colors duration-500 group-hover:border-cyan-500/30">
                 <span className="text-cyan-400">
                   {category.icon === "code" && <IconCode />}
                   {category.icon === "layers" && <IconLayers />}
