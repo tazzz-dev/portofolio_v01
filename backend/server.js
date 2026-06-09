@@ -20,6 +20,30 @@ const portfolioData = {
   linkedin: "https://linkedin.com/in/muhammadmumtaaz",
   profileImage: "/foto-saya.png",
   
+  aboutImages: [
+    "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=400",
+    "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80&w=400",
+    "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=400"
+  ],
+
+  timeline: [
+    {
+      year: "2023",
+      title: "Exploration Phase",
+      desc: "Delved into specialized tech stacks and began integrating hardware with intelligent software solutions."
+    },
+    {
+      year: "2024",
+      title: "Professional Growth",
+      desc: "Focused on building scalable applications and mastering modern fullstack architectures."
+    },
+    {
+      year: "2025",
+      title: "Future Frontiers",
+      desc: "Pushing the boundaries of digital experiences with a focus on robotics and immersive web art."
+    }
+  ],
+
   // (Masukkan juga object skillCategories dari App.jsx di sini)
   skillCategories: [
     {

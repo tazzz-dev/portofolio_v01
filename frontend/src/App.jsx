@@ -96,6 +96,25 @@ function AnimatedBackground() {
         .animation-delay-2000 { animation-delay: 2s; }
         .animation-delay-4000 { animation-delay: 4s; }
 
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        @keyframes spin-slow {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        @keyframes float-hologram {
+          0%, 100% { transform: translateY(0) rotate(0deg); }
+          50% { transform: translateY(-20px) rotate(5deg); }
+        }
+        @keyframes pulse-glow {
+          0%, 100% { opacity: 0.5; filter: blur(20px); }
+          50% { opacity: 0.8; filter: blur(40px); }
+        }
+        .animate-spin-slow { animation: spin-slow 20s linear infinite; }
+        .animate-float-hologram { animation: float-hologram 6s ease-in-out infinite; }
+        .animate-pulse-glow { animation: pulse-glow 4s ease-in-out infinite; }
+
         /* Scroll Transition Styles */
         .fade-in-section {
           opacity: 0;
@@ -171,12 +190,34 @@ function Typewriter({ words }) {
   );
 }
 
+// ─── UTILS ───────────────────────────────────────────────────────────────────
+const scrollPageTo = (id) => {
+  const targetId = id.toLowerCase();
+  const element = document.getElementById(targetId);
+  
+  if (element) {
+    const trigger = ScrollTrigger.getAll().find(st => st.trigger === element);
+    if (trigger) {
+      gsap.to(window, {
+        scrollTo: { y: trigger.end },
+        duration: 1.2,
+        ease: "power3.inOut"
+      });
+    } else {
+      gsap.to(window, {
+        scrollTo: { y: element, offsetY: 80 },
+        duration: 1.2,
+        ease: "power3.inOut"
+      });
+    }
+  }
+};
+
 // ─── NAVBAR ───────────────────────────────────────────────────────────────────
 function Navbar({ data }) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   
-  // Menghapus 'Experience' dari Navigation links
   const navLinks = ["About", "Tools", "Projects", "Contact"];
 
   useEffect(() => {
@@ -185,31 +226,8 @@ function Navbar({ data }) {
     return () => window.removeEventListener("scroll", fn);
   }, []);
 
-  const scrollTo = (id) => {
-    const targetId = id.toLowerCase();
-    const element = document.getElementById(targetId);
-    
-    if (element) {
-      // Find the ScrollTrigger instance associated with this section's pinning
-      const trigger = ScrollTrigger.getAll().find(st => st.trigger === element);
-      
-      if (trigger) {
-        // Scroll exactly to the end position of the pinning animation.
-        // This ensures content is fully revealed and the next scroll moves immediately.
-        gsap.to(window, {
-          scrollTo: { y: trigger.end },
-          duration: 1.2,
-          ease: "power3.inOut"
-        });
-      } else {
-        // Fallback for sections without GSAP pinning (like hero/contact sometimes)
-        gsap.to(window, {
-          scrollTo: { y: element, offsetY: 80 },
-          duration: 1.2,
-          ease: "power3.inOut"
-        });
-      }
-    }
+  const handleNavClick = (id) => {
+    scrollPageTo(id);
     setOpen(false);
   };
 
@@ -232,7 +250,7 @@ function Navbar({ data }) {
           {navLinks.map((l) => (
             <button
               key={l}
-              onClick={() => scrollTo(l)}
+              onClick={() => handleNavClick(l)}
               className="text-slate-400 hover:text-cyan-400 transition-colors duration-200"
             >
               {l}
@@ -250,7 +268,7 @@ function Navbar({ data }) {
           {navLinks.map((l) => (
             <button
               key={l}
-              onClick={() => scrollTo(l)}
+              onClick={() => handleNavClick(l)}
               className="text-slate-300 hover:text-cyan-400 text-left text-sm font-medium transition-colors"
             >
               {l}
@@ -262,36 +280,141 @@ function Navbar({ data }) {
   );
 }
 
-// ─── HERO & VINYL RECORD ──────────────────────────────────────────────────────
-function Hero({ data }) {
-  const containerRef = useRef(null);
-  const [rotation, setRotation] = useState({ x: 0, y: 0 });
+function HolographicSphere({ skills }) {
+  const [rotation, setRotation] = useState({ x: -20, y: -20 });
+  const [isDragging, setIsDragging] = useState(false);
+  const lastMousePos = useRef({ x: 0, y: 0 });
+  const [radius, setRadius] = useState(150);
 
-  const handleMouseMove = (e) => {
-    if (!containerRef.current) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    
-    const x = (e.clientX - centerX) / (rect.width / 2);
-    const y = (e.clientY - centerY) / (rect.height / 2);
-    
-    const maxTilt = 20;
+  useEffect(() => {
+    const updateSize = () => {
+      setRadius(window.innerWidth >= 768 ? 210 : 140);
+    };
+    updateSize();
+    window.addEventListener("resize", updateSize);
+    return () => window.removeEventListener("resize", updateSize);
+  }, []);
 
-    setRotation({
-      x: -y * maxTilt,
-      y: x * maxTilt
-    });
+  // Filter skills and create a flat list of items
+  const sphereLogos = skills?.flatMap(cat => cat.items) || [];
+
+  const handleMouseDown = (e) => {
+    setIsDragging(true);
+    lastMousePos.current = { x: e.clientX, y: e.clientY };
   };
 
-  const layers = [
-    { id: 1, opacity: 0.15, z: -100, blur: "blur(6px)" },
-    { id: 2, opacity: 0.30, z: -60,  blur: "blur(3px)" },
-    { id: 3, opacity: 0.60, z: -30,  blur: "blur(1px)" },
-    { id: 4, opacity: 1.00, z: 0,    blur: "blur(0px)" }, 
-  ];
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      if (!isDragging) return;
+      const deltaX = e.clientX - lastMousePos.current.x;
+      const deltaY = e.clientY - lastMousePos.current.y;
+      setRotation(prev => ({ x: prev.x - deltaY * 0.5, y: prev.y + deltaX * 0.5 }));
+      lastMousePos.current = { x: e.clientX, y: e.clientY };
+    };
+    const handleMouseUp = () => setIsDragging(false);
+    if (isDragging) {
+      window.addEventListener("mousemove", handleMouseMove);
+      window.addEventListener("mouseup", handleMouseUp);
+    }
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [isDragging]);
 
+  return (
+    <div 
+      className="relative w-[300px] h-[300px] md:w-[450px] md:h-[450px] flex items-center justify-center cursor-grab active:cursor-grabbing select-none"
+      onMouseDown={handleMouseDown}
+      style={{ perspective: "1200px", transformStyle: "preserve-3d" }}
+    >
+      {/* Unified 3D Container */}
+      <div className="relative w-full h-full flex items-center justify-center transition-transform duration-75 ease-out"
+           style={{ transform: `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`, transformStyle: "preserve-3d" }}>
+        
+        {/* Core Glow */}
+        <div className="absolute w-32 h-32 bg-cyan-500/30 rounded-full blur-[60px]" style={{ transform: "translateZ(0)" }} />
+        
+        {/* 1. Sphere Mesh Rings */}
+        <div className="absolute inset-0 flex items-center justify-center" style={{ transformStyle: "preserve-3d" }}>
+          {[0, 30, 60, 90, 120, 150].map((deg) => (
+            <div key={`v-${deg}`} 
+                 className="absolute rounded-full border border-cyan-500/20"
+                 style={{ 
+                   width: radius * 2, height: radius * 2,
+                   transform: `rotateY(${deg}deg)`, 
+                   backgroundImage: "radial-gradient(circle at center, transparent 70%, rgba(6, 182, 212, 0.05) 100%)" 
+                 }} />
+          ))}
+          {[0, 45, 90].map((deg) => (
+            <div key={`h-${deg}`} 
+                 className="absolute rounded-full border border-cyan-500/10"
+                 style={{ 
+                   width: radius * 2, height: radius * 2,
+                   transform: `rotateX(${deg}deg)` 
+                 }} />
+          ))}
+        </div>
+
+        {/* 2. Global Network Nodes - Background Points */}
+        <div className="absolute top-1/2 left-1/2 w-0 h-0" style={{ transformStyle: "preserve-3d" }}>
+          {[...Array(20)].map((_, i) => {
+            const phi = Math.acos(-1 + (2 * i) / 20);
+            const theta = Math.sqrt(20 * Math.PI) * phi;
+            const r = radius; 
+            const dx = r * Math.sin(phi) * Math.cos(theta);
+            const dy = r * Math.sin(phi) * Math.sin(theta);
+            const dz = r * Math.cos(phi);
+
+            return (
+              <div key={i} 
+                   className="absolute w-1 h-1 bg-cyan-400/60 rounded-full"
+                   style={{ 
+                     transform: `translate3d(${dx}px, ${dy}px, ${dz}px)`,
+                     left: "-0.5px", top: "-0.5px" 
+                   }} />
+            );
+          })}
+        </div>
+
+        {/* 3. Technology Logos - Distributed across the sphere */}
+        <div className="absolute top-1/2 left-1/2 w-0 h-0" style={{ transformStyle: "preserve-3d" }}>
+          {sphereLogos.map((logo, idx) => {
+            // Fibonacci Sphere distribution for logos
+            const total = sphereLogos.length;
+            const phi = Math.acos(-1 + (2 * idx) / total);
+            const theta = Math.sqrt(total * Math.PI) * phi;
+            
+            // Push logos slightly further out than the rings for visibility
+            const r = radius * 1.1; 
+            const dx = r * Math.sin(phi) * Math.cos(theta);
+            const dy = r * Math.sin(phi) * Math.sin(theta);
+            const dz = r * Math.cos(phi);
+
+            return (
+              <div key={idx} 
+                   className="absolute w-10 h-10 md:w-12 md:h-12 flex items-center justify-center bg-[#070b14]/90 backdrop-blur-md border border-cyan-500/40 rounded-xl shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:border-cyan-400 transition-colors"
+                   style={{ 
+                     transform: `translate3d(${dx}px, ${dy}px, ${dz}px) rotateX(${-rotation.x}deg) rotateY(${-rotation.y}deg)`,
+                     left: "-20px", top: "-20px"
+                   }}>
+                <img src={`https://cdn.simpleicons.org/${logo.slug}/${logo.color}`} className="w-5 h-5 md:w-6 md:h-6 pointer-events-none" alt={logo.slug} />
+              </div>
+            );
+          })}
+        </div>
+
+      </div>
+      
+      <div className="absolute bottom-[-20px] left-1/2 -translate-x-1/2 text-[10px] font-mono text-slate-500 uppercase tracking-widest opacity-50 pointer-events-none">
+        Click & Drag to Rotate
+      </div>
+    </div>
+  );
+}
+
+// ─── HERO ─────────────────────────────────────────────────────────────────────
+function Hero({ data }) {
   return (
     <section className="min-h-screen flex items-center pt-20 px-6">
       <div className="max-w-6xl mx-auto w-full grid md:grid-cols-5 gap-12 items-center">
@@ -299,73 +422,139 @@ function Hero({ data }) {
           <h1 className="text-6xl md:text-8xl font-extrabold leading-tight text-white tracking-tighter">
             {data.heroName}
           </h1>
-          
           <h2 className="text-xl md:text-2xl text-slate-300 font-medium tracking-wide min-h-[32px]">
             <Typewriter words={data.roles} />
           </h2>
-          
           <p className="text-slate-400 max-w-2xl leading-relaxed text-lg">
             {data.about}
           </p>
-
-          
           <div className="flex gap-4 pt-4">
             <button
-              onClick={() => scrollTo("Projects")}
+              onClick={() => scrollPageTo("Projects")}
               className="px-6 py-3 bg-cyan-500 hover:bg-cyan-400 text-[#070b14] text-sm font-bold rounded-lg transition-all duration-200 hover:shadow-lg hover:shadow-cyan-500/30 active:scale-95"
             >
               View My Projects
             </button>
             <button
-              onClick={() => scrollTo("Contact")}
+              onClick={() => scrollPageTo("Contact")}
               className="px-6 py-3 border border-slate-600 hover:border-cyan-500 text-slate-300 hover:text-cyan-400 text-sm font-semibold rounded-lg transition-all duration-200 backdrop-blur-sm"
             >
               Let's Connect
             </button>
           </div>
-
           <div className="flex gap-4 pt-4">
-            <a href={data.github} target="_blank" rel="noreferrer" className="text-slate-500 hover:text-cyan-400 transition-colors">
-              <IconGithub />
-            </a>
-            <a href={data.linkedin} target="_blank" rel="noreferrer" className="text-slate-500 hover:text-cyan-400 transition-colors">
-              <IconLinkedin />
-            </a>
-            <a href={`mailto:${data.email}`} className="text-slate-500 hover:text-cyan-400 transition-colors">
-              <IconMail />
-            </a>
+            <a href={data.github} target="_blank" rel="noreferrer" className="text-slate-500 hover:text-cyan-400 transition-colors"><IconGithub /></a>
+            <a href={data.linkedin} target="_blank" rel="noreferrer" className="text-slate-500 hover:text-cyan-400 transition-colors"><IconLinkedin /></a>
+            <a href={`mailto:${data.email}`} className="text-slate-500 hover:text-cyan-400 transition-colors"><IconMail /></a>
           </div>
         </div>
-
-        {/* ─── INTERACTIVE 3D PARALLAX TILT ─── */}
-        <div className="md:col-span-2 relative w-full h-[400px] md:h-[550px] flex items-center justify-center mt-10 md:mt-0" style={{ perspective: "1000px" }}>
-          <div
-            ref={containerRef}
-            onMouseMove={handleMouseMove}
-            className="relative w-full h-full flex items-center justify-center"
-            style={{
-              transformStyle: "preserve-3d", 
-              transform: `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`,
-              transition: "transform 0.3s ease-out", 
-            }}
-          >
-            {layers.map((layer) => (
-              <img
-                key={layer.id}
-                src={data.profileImage}
-                alt="Muhammad Mumtaaz"
-                className="absolute w-full h-[110%] md:h-[125%] max-w-none object-contain object-center pointer-events-none drop-shadow-2xl"
-                style={{
-                  opacity: layer.opacity,
-                  filter: layer.blur,
-                  transform: `translateZ(${layer.z}px)`,
-                }}
-              />
-            ))}
-          </div>
+        <div className="md:col-span-2 relative w-full h-[400px] md:h-[550px] flex items-center justify-center mt-10 md:mt-0">
+           <HolographicSphere skills={data.skillCategories} />
         </div>
       </div>
     </section>
+  );
+}
+
+function JourneyTimeline({ timeline }) {
+  const [activeStep, setActiveStep] = useState(null);
+  const [scrollProgress, setScrollProgress] = useState(0);
+
+  useEffect(() => {
+    // We listen to the ScrollTrigger of the #about section
+    const st = ScrollTrigger.getById("aboutTrigger");
+    if (!st) return;
+
+    const updateTimeline = () => {
+      setScrollProgress(st.progress);
+      // Map progress (0 to 1) to active steps (0 to 2)
+      // We want it to light up as the user scrolls through the pinning duration
+      if (st.progress < 0.1) setActiveStep(null);
+      else if (st.progress < 0.4) setActiveStep(0);
+      else if (st.progress < 0.7) setActiveStep(1);
+      else setActiveStep(2);
+    };
+
+    // Add listener to the existing ScrollTrigger
+    st.header = updateTimeline; // Custom property to hook into onUpdate
+    
+    // Actually, it's better to find the trigger and add an onUpdate listener if possible, 
+    // or use a dedicated effect that watches the about trigger.
+    // For simplicity and reliability in this setup, let's use a refresh/update loop or 
+    // ensure the About component passes progress down.
+  }, []);
+
+  // For absolute reliability, let's use a dedicated ScrollTrigger inside the component 
+  // that matches the #about section's timing.
+  useEffect(() => {
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: "#about",
+        start: "top top",
+        end: "+=300%",
+        scrub: true,
+        onUpdate: (self) => {
+          setScrollProgress(self.progress);
+          // Added more 'dead zone' at the start (0.25) so it stays dark for a bit after pinning
+          if (self.progress < 0.25) setActiveStep(null);
+          else if (self.progress < 0.50) setActiveStep(0);
+          else if (self.progress < 0.75) setActiveStep(1);
+          else setActiveStep(2);
+        }
+      }
+    });
+    return () => tl.kill();
+  }, []);
+
+  return (
+    <div className="relative flex flex-col gap-6 pl-10 py-2">
+      {/* 1. Garis Konektor Neon Dinamis (Berdasarkan Scroll) */}
+      <div className="absolute left-[8px] top-6 bottom-6 w-[2px] bg-slate-800 rounded-full overflow-hidden">
+        <div 
+          className="w-full bg-gradient-to-b from-cyan-400 to-blue-600 shadow-[0_0_15px_rgba(34,211,238,0.5)] transition-all duration-300 ease-out"
+          style={{ height: `${scrollProgress * 100}%` }}
+        />
+      </div>
+
+      {timeline.slice(0, 3).map((item, index) => {
+        const isActive = activeStep === index;
+        return (
+          <div key={index} className="relative">
+            {/* 2. Node Titik Indikator - Aligned with the center of the card */}
+            <div 
+              className={`absolute left-[-40px] top-1/2 -translate-y-1/2 w-4 h-4 rounded-full border-2 transition-all duration-500 z-10
+                ${isActive 
+                  ? "bg-cyan-400 border-cyan-300 scale-125 shadow-[0_0_15px_rgba(34,211,238,0.8)]" 
+                  : "bg-[#070b14] border-slate-700 scale-100"
+                }`}
+            >
+              {isActive && (
+                <div className="absolute inset-0 rounded-full animate-ping bg-cyan-400/40" />
+              )}
+            </div>
+
+            {/* 3. Kotak Konten Berbasis Kondisi (Scroll) */}
+            <div 
+              className={`p-5 rounded-xl border transition-all duration-500 backdrop-blur-md cursor-default
+                ${isActive 
+                  ? "bg-cyan-500/10 border-cyan-500/50 shadow-[0_0_25px_rgba(6,182,212,0.15)] translate-x-2" 
+                  : "bg-[#0b1120]/20 border-slate-800/30 opacity-70"
+                }`}
+            >
+              <span className={`text-[10px] font-mono font-bold tracking-widest uppercase transition-colors duration-500 ${isActive ? "text-cyan-400" : "text-slate-600"}`}>
+                {item.year}
+              </span>
+              <h4 className={`text-base font-bold mt-0.5 transition-colors duration-500 ${isActive ? "text-white" : "text-slate-400"}`}>
+                {item.title}
+              </h4>
+              <p className={`text-xs leading-relaxed mt-1.5 transition-colors duration-500 ${isActive ? "text-slate-300" : "text-slate-500"}`}>
+                {item.desc}
+              </p>
+            </div>
+          </div>
+        );
+      })}
+    </div>
   );
 }
 
@@ -380,7 +569,7 @@ function About({ data }) {
         scrollTrigger: {
           trigger: sectionRef.current,
           start: "top top",
-          end: "+=150%", 
+          end: "+=300%", 
           scrub: true,
           pin: true,
           anticipatePin: 1,
@@ -402,21 +591,26 @@ function About({ data }) {
         <div>
           <SectionTitle label="Tentang Saya" title="The Journey" />
           <p className="text-slate-400 leading-relaxed mt-6">{data.about}</p>
-          <div className="grid grid-cols-2 gap-4 mt-8">
-            {[
-              { label: "Proyek Selesai", value: "20+" },
-              { label: "Tahun Pengalaman", value: "5+" },
-              { label: "Klien Puas", value: "15+" },
-              { label: "Kontribusi GitHub", value: "300+" },
-            ].map((s) => (
-              <div key={s.label} className="bg-[#0b1120]/60 backdrop-blur-md border border-slate-800/50 rounded-xl p-4 text-center hover:border-cyan-500/30 transition-colors">
-                <p className="text-2xl font-extrabold text-cyan-400">{s.value}</p>
-                <p className="text-xs text-slate-500 mt-1">{s.label}</p>
+          
+          {/* Image Grid Placeholder - Bento Style */}
+          <div className="grid grid-cols-3 gap-3 mt-8 h-48">
+            <div className="col-span-2 rounded-2xl overflow-hidden border border-slate-800/50 group">
+              <img src={data.aboutImages?.[0]} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 scale-110 group-hover:scale-100" />
+            </div>
+            <div className="flex flex-col gap-3">
+              <div className="h-1/2 rounded-2xl overflow-hidden border border-slate-800/50 group">
+                <img src={data.aboutImages?.[1]} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 scale-110 group-hover:scale-100" />
               </div>
-            ))}
+              <div className="h-1/2 rounded-2xl overflow-hidden border border-slate-800/50 group">
+                <img src={data.aboutImages?.[2]} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 scale-110 group-hover:scale-100" />
+              </div>
+            </div>
           </div>
         </div>
-        <div className="hidden md:block"></div>
+        
+        <div className="hidden md:block py-6 px-4">
+           {data.timeline && <JourneyTimeline timeline={data.timeline} />}
+        </div>
       </div>
     </section>
   );
