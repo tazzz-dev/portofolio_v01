@@ -60,11 +60,12 @@ const portfolioData = {
     {
       id: 1,
       title: "BarnE",
+      year: "2024",
       description: "Sistem manajemen inventaris peternakan modern.",
       longDescription: "BarnE adalah solusi digital untuk mengelola stok pakan, kesehatan hewan, dan jadwal panen secara efisien. Membantu pemilik peternakan memantau aset mereka dalam satu dasbor terpusat.",
       image: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&q=80&w=800",
-      status: "In Development",
-      role: "Fullstack Developer",
+      status: "Completed",
+      role: "System Analyst & UI/UX Designer",
       tags: ["React", "Node.js", "PostgreSQL"],
       link: "#",
       repo: "#",
@@ -72,6 +73,7 @@ const portfolioData = {
     {
       id: 2,
       title: "PongGame",
+      year: "2023",
       description: "Reinkarnasi modern dari game arcade klasik Pong.",
       longDescription: "Dibuat dengan mesin game web modern, PongGame menawarkan kontrol yang responsif, sistem skor real-time, dan kecerdasan buatan (AI) yang menantang untuk pemain tunggal.",
       image: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&q=80&w=800",
@@ -84,6 +86,7 @@ const portfolioData = {
     {
       id: 3,
       title: "RestoApp",
+      year: "2024",
       description: "Aplikasi pemesanan menu restoran berbasis QR Code.",
       longDescription: "RestoApp memungkinkan pelanggan memesan makanan langsung dari meja mereka melalui pemindaian kode QR, mengintegrasikan sistem dapur langsung dengan pesanan pelanggan.",
       image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=800",
@@ -96,6 +99,7 @@ const portfolioData = {
     {
       id: 4,
       title: "SnakeGame",
+      year: "2022",
       description: "Game ular klasik dengan peningkatan grafis dan level.",
       longDescription: "SnakeGame membawa kembali nostalgia dengan tambahan rintangan dinamis, berbagai jenis 'makanan' dengan efek berbeda, dan sistem peringkat global (leaderboard).",
       image: "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=800",
@@ -108,6 +112,7 @@ const portfolioData = {
     {
       id: 5,
       title: "SocialAct",
+      year: "2024",
       description: "Platform aksi sosial untuk manajemen relawan.",
       longDescription: "Platform komprehensif yang dirancang untuk memfasilitasi organisasi sosial dalam mengelola relawan, kampanye donasi, dan pelaporan dampak secara transparan.",
       image: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&q=80&w=800",

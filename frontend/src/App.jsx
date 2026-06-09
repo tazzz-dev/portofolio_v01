@@ -478,9 +478,9 @@ function Projects({ data }) {
           {data.projects.map((p) => (
             <div
               key={p.id}
-              className="group relative bg-[#0b1120]/40 backdrop-blur-md border border-slate-800/50 rounded-2xl overflow-hidden cursor-pointer
+              className="group relative bg-[#0b1120]/90 backdrop-blur-md border border-slate-800/50 rounded-2xl overflow-hidden cursor-pointer
                          transition-all duration-500 ease-in-out flex flex-col md:flex-row
-                         hover:bg-[#0f172a]/90 hover:border-cyan-500/50 
+                         hover:bg-[#0f172a]/95 hover:border-cyan-500/50 
                          hover:shadow-[0_0_50px_rgba(6,182,212,0.15)]"
             >
               {/* Image Container - Slides in from left on hover */}
@@ -510,6 +510,9 @@ function Projects({ data }) {
                 </div>
 
                 <div className="flex flex-col gap-2">
+                  <span className="text-xs font-bold text-cyan-500/50 group-hover:text-cyan-400 transition-colors tracking-[0.2em]">
+                    {p.year}
+                  </span>
                   <div className="flex items-center gap-4">
                     <h3 className="text-2xl font-black text-white group-hover:text-cyan-400 transition-colors">
                       {p.title}
@@ -620,6 +623,37 @@ function SectionTitle({ label, title, center = false }) {
   );
 }
 
+// ─── FADE IN SECTION COMPONENT ──────────────────────────────────────────────
+function FadeInSection({ children }) {
+  const [isVisible, setVisible] = useState(false);
+  const domRef = useRef();
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+        } else {
+          setVisible(false);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    const { current } = domRef;
+    observer.observe(current);
+    return () => observer.unobserve(current);
+  }, []);
+
+  return (
+    <div
+      className={`fade-in-section ${isVisible ? "is-visible" : ""}`}
+      ref={domRef}
+    >
+      {children}
+    </div>
+  );
+}
+
 // ─── APP ──────────────────────────────────────────────────────────────────────
 export default function App() {
   const [portfolioData, setPortfolioData] = useState(null);
@@ -669,6 +703,18 @@ export default function App() {
           /* Panjang 'cahaya' 25 unit, area kosong 75 unit */
           stroke-dasharray: 25 75; 
           animation: trace-light 1.5s linear infinite;
+        }
+
+        /* Scroll Transition Styles */
+        .fade-in-section {
+          opacity: 0;
+          transform: translateY(40px);
+          transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1), transform 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+          will-change: opacity, transform;
+        }
+        .fade-in-section.is-visible {
+          opacity: 1;
+          transform: translateY(0);
         }
       `}</style>
 
@@ -725,11 +771,27 @@ export default function App() {
         <div className="min-h-screen text-white relative">
           <AnimatedBackground />
           <Navbar data={portfolioData} />
-          <Hero data={portfolioData} />
-          <About data={portfolioData} />
-          <Skills data={portfolioData} />
-          <Projects data={portfolioData} />
-          <Contact data={portfolioData} />
+          
+          <FadeInSection>
+            <Hero data={portfolioData} />
+          </FadeInSection>
+
+          <FadeInSection>
+            <About data={portfolioData} />
+          </FadeInSection>
+
+          <FadeInSection>
+            <Skills data={portfolioData} />
+          </FadeInSection>
+
+          <FadeInSection>
+            <Projects data={portfolioData} />
+          </FadeInSection>
+
+          <FadeInSection>
+            <Contact data={portfolioData} />
+          </FadeInSection>
+          
           <Footer data={portfolioData} />
         </div>
       ) : (
