@@ -190,15 +190,25 @@ function Navbar({ data }) {
     const element = document.getElementById(targetId);
     
     if (element) {
-      // Adjusted offset to 80% of viewport height for deeper entry
-      // This ensures animations are fully settled and the next scroll moves quickly.
-      const offset = window.innerHeight * 0.8; 
+      // Find the ScrollTrigger instance associated with this section's pinning
+      const trigger = ScrollTrigger.getAll().find(st => st.trigger === element);
       
-      gsap.to(window, {
-        scrollTo: { y: element, offsetY: -offset },
-        duration: 1.5,
-        ease: "power4.out"
-      });
+      if (trigger) {
+        // Scroll exactly to the end position of the pinning animation.
+        // This ensures content is fully revealed and the next scroll moves immediately.
+        gsap.to(window, {
+          scrollTo: { y: trigger.end },
+          duration: 1.2,
+          ease: "power3.inOut"
+        });
+      } else {
+        // Fallback for sections without GSAP pinning (like hero/contact sometimes)
+        gsap.to(window, {
+          scrollTo: { y: element, offsetY: 80 },
+          duration: 1.2,
+          ease: "power3.inOut"
+        });
+      }
     }
     setOpen(false);
   };
@@ -301,19 +311,13 @@ function Hero({ data }) {
           
           <div className="flex gap-4 pt-4">
             <button
-              onClick={() => {
-                const el = document.getElementById("projects");
-                if (el) gsap.to(window, { scrollTo: { y: el, offsetY: -window.innerHeight * 0.8 }, duration: 1.5, ease: "power4.out" });
-              }}
+              onClick={() => scrollTo("Projects")}
               className="px-6 py-3 bg-cyan-500 hover:bg-cyan-400 text-[#070b14] text-sm font-bold rounded-lg transition-all duration-200 hover:shadow-lg hover:shadow-cyan-500/30 active:scale-95"
             >
               View My Projects
             </button>
             <button
-              onClick={() => {
-                const el = document.getElementById("contact");
-                if (el) gsap.to(window, { scrollTo: { y: el, offsetY: -window.innerHeight * 0.8 }, duration: 1.5, ease: "power4.out" });
-              }}
+              onClick={() => scrollTo("Contact")}
               className="px-6 py-3 border border-slate-600 hover:border-cyan-500 text-slate-300 hover:text-cyan-400 text-sm font-semibold rounded-lg transition-all duration-200 backdrop-blur-sm"
             >
               Let's Connect
@@ -512,8 +516,9 @@ function Tools({ data }) {
   return (
     <section ref={sectionRef} id="tools" className="h-screen flex items-center bg-transparent overflow-hidden relative z-10">
       <div ref={contentRef} className="max-w-6xl mx-auto px-6 w-full">
-        <div className="text-center mb-16">
+        <div className="text-center mb-8">
           <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-4">Tools & Technologies</h2>
+          <div className="mt-3 h-1 w-32 bg-cyan-500 rounded-full mx-auto mb-6" />
           <p className="text-slate-400 text-sm md:text-base font-medium">Technologies I work with daily</p>
         </div>
 
@@ -574,7 +579,7 @@ function Projects({ data }) {
       <div ref={contentRef} className="max-w-4xl mx-auto px-6 w-full">
         <SectionTitle label="Portofolio" title="Proyek Terbaru" />
         
-        <div className="mt-16 flex flex-col gap-4">
+        <div className="mt-8 flex flex-col gap-4">
           {data.projects.map((p) => (
             <div
               key={p.id}
