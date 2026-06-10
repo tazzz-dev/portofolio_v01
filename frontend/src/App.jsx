@@ -1019,10 +1019,11 @@ export default function App() {
   const [portfolioData, setPortfolioData] = useState(null);
   const [phase, setPhase] = useState(0); 
   const [selectedPdf, setSelectedPdf] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const startTime = Date.now();
-    axios.get("/api/")
+    axios.get("/api")
       .then((response) => {
         setPortfolioData(response.data);
         const elapsedTime = Date.now() - startTime;
@@ -1037,10 +1038,28 @@ export default function App() {
           }, 1200); 
         }, remainingTime);
       })
-      .catch((error) => {
-        console.error("Kesalahan pengambilan data:", error);
+      .catch((err) => {
+        console.error("Kesalahan pengambilan data:", err);
+        setError("Gagal memuat data portofolio. Pastikan backend berjalan.");
       });
   }, []);
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-[#070b14] flex items-center justify-center text-white p-6">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-red-400 mb-4">Error</h2>
+          <p className="text-slate-300">{error}</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="mt-6 px-6 py-2 bg-cyan-500 text-[#070b14] rounded-lg font-bold"
+          >
+            Coba Lagi
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
