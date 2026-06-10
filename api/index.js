@@ -1,5 +1,3 @@
-const portfolioData = require('../backend/data.js');
+const app = require('../server.js')
 
-export default function handler(req, res) {
-  res.json(portfolioData);
-}
+module.exports = app
