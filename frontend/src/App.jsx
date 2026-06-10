@@ -1022,7 +1022,7 @@ export default function App() {
 
   useEffect(() => {
     const startTime = Date.now();
-    axios.get(import.meta.env.VITE_API_URL || "http://localhost:8080/") 
+    axios.get("/_/backend/") 
       .then((response) => {
         setPortfolioData(response.data);
         const elapsedTime = Date.now() - startTime;
