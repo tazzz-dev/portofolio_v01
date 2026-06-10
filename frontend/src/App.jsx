@@ -1022,7 +1022,7 @@ export default function App() {
 
   useEffect(() => {
     const startTime = Date.now();
-    axios.get("/_/backend/") 
+    axios.get("/api/")
       .then((response) => {
         setPortfolioData(response.data);
         const elapsedTime = Date.now() - startTime;
