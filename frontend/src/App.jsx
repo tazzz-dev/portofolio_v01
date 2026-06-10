@@ -724,8 +724,60 @@ function Tools({ data }) {
   );
 }
 
+// ─── PDF MODAL COMPONENT ──────────────────────────────────────────────────────
+function PdfModal({ url, onClose }) {
+  // Function to transform Google Drive view links to preview links for iframe
+  const getPreviewUrl = (originalUrl) => {
+    if (originalUrl.includes("drive.google.com")) {
+      return originalUrl.replace("/view?usp=sharing", "/preview").replace("/view", "/preview");
+    }
+    return originalUrl;
+  };
+
+  const previewUrl = getPreviewUrl(url);
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-10 animate-fadeIn">
+      <div 
+        className="absolute inset-0 bg-black/80 backdrop-blur-sm" 
+        onClick={onClose}
+      />
+      <div className="relative w-full max-w-5xl h-[80vh] md:h-[90vh] bg-[#0b1120] border border-cyan-500/30 rounded-2xl shadow-[0_0_50px_rgba(6,182,212,0.3)] overflow-hidden flex flex-col z-10">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800">
+          <h3 className="text-lg font-bold text-white flex items-center gap-2">
+            <span className="w-2 h-2 bg-cyan-500 rounded-full animate-pulse" />
+            Project Document
+          </h3>
+          <button 
+            onClick={onClose}
+            className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+          >
+            <IconClose />
+          </button>
+        </div>
+        <div className="flex-1 bg-[#070b14]">
+          <iframe 
+            src={previewUrl} 
+            className="w-full h-full border-none"
+            title="PDF Preview"
+            allow="autoplay"
+          />
+        </div>
+        <div className="px-6 py-3 border-t border-slate-800 flex justify-end">
+          <button 
+            onClick={onClose}
+            className="px-4 py-2 text-sm font-semibold text-slate-400 hover:text-cyan-400 transition-colors"
+          >
+            Close Preview
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── PROJECTS (GSAP HORIZONTAL REVEAL WITH VERTICAL SCROLL) ──────────────────────────────────────────────────
-function Projects({ data }) {
+function Projects({ data, onOpenPdf }) {
   const sectionRef = useRef(null);
   const contentRef = useRef(null);
 
@@ -822,9 +874,17 @@ function Projects({ data }) {
                   <a href={p.repo} target="_blank" rel="noreferrer" className="text-slate-500 hover:text-white transition-all hover:scale-110">
                     <IconGithub />
                   </a>
-                  <a href={p.link} target="_blank" rel="noreferrer" className="text-slate-500 hover:text-cyan-400 transition-all hover:scale-110">
-                    <IconExternal />
-                  </a>
+                  {p.link && p.link !== "#" && (
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onOpenPdf(p.link);
+                      }} 
+                      className="text-slate-500 hover:text-cyan-400 transition-all hover:scale-110"
+                    >
+                      <IconExternal />
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -958,6 +1018,7 @@ function FadeInSection({ children }) {
 export default function App() {
   const [portfolioData, setPortfolioData] = useState(null);
   const [phase, setPhase] = useState(0); 
+  const [selectedPdf, setSelectedPdf] = useState(null);
 
   useEffect(() => {
     const startTime = Date.now();
@@ -1027,11 +1088,18 @@ export default function App() {
 
           <Tools data={portfolioData} />
 
-          <Projects data={portfolioData} />
+          <Projects data={portfolioData} onOpenPdf={(url) => setSelectedPdf(url)} />
 
           <Contact data={portfolioData} />
           
           <Footer data={portfolioData} />
+
+          {selectedPdf && (
+            <PdfModal 
+              url={selectedPdf} 
+              onClose={() => setSelectedPdf(null)} 
+            />
+          )}
         </div>
       ) : (
         <div className="min-h-screen bg-[#070b14]" />
@@ -1039,3 +1107,4 @@ export default function App() {
     </>
   );
 }
+
