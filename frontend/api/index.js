@@ -95,7 +95,7 @@ export default function handler(req, res) {
         status: "Completed",
         role: "System Analyst & UI/UX Designer",
         tags: ["Figma", "DesignThinking", "UI/UX", "UserResearch"],
-        link: "https://drive.google.com/file/d/1rK7i85SV2_ShIVejU0QhCFVDje97b9Oi/view?usp=sharing",
+        link: "https://drive.google.com/file/d/17-eMZJQ6C2b9_94BUbUz9_P3hgrNrgQs/view?usp=drive_link",
         repo: "#"
       },
       {
@@ -134,7 +134,7 @@ export default function handler(req, res) {
         status: "Completed",
         role: "Full-Stack Developer",
         tags: ["CodeIgniter 3", "MySQL", "PHP", "JavaScript", "HTML5", "CSS3"],
-        link: "https://drive.google.com/file/d/1dW2HLf8hsP0f4ay-uhhRwHA0k_RJILgF/view?usp=sharing",
+        link: "https://drive.google.com/file/d/1llr6OYW9KATH3qa5okMk4BIHrS4VumBy/view?usp=drive_link",
         repo: "https://github.com/tazzz-dev/resto-app",
       },
       {
@@ -147,7 +147,7 @@ export default function handler(req, res) {
         status: "Completed",
         role: "Full-Stack Developer",
         tags: ["CodeIgniter3", "MySQL", "PHP", "JavaScript", "HTML5", "CSS3"],
-        link: "https://drive.google.com/file/d/13XTpE8D5Czjirxtala-_8ay9_ixYSN38/view?usp=sharing",
+        link: "https://drive.google.com/file/d/1mlVLPcdQsDg9bWOSuAPvfsQ5b9rIk16E/view?usp=drive_link",
         repo: "https://github.com/mfaatihyusron/socialact",
       }
     ]
