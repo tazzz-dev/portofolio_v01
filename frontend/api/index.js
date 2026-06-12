@@ -95,8 +95,7 @@ export default function handler(req, res) {
         status: "Completed",
         role: "System Analyst & UI/UX Designer",
         tags: ["Figma", "DesignThinking", "UI/UX", "UserResearch"],
-        link: "https://drive.google.com/file/d/17-eMZJQ6C2b9_94BUbUz9_P3hgrNrgQs/view?usp=drive_link",
-        repo: "#"
+        link: "https://drive.google.com/file/d/17-eMZJQ6C2b9_94BUbUz9_P3hgrNrgQs/view?usp=drive_link"
       },
       {
         id: 2,
