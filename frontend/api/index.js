@@ -148,6 +148,19 @@ export default function handler(req, res) {
         tags: ["CodeIgniter3", "MySQL", "PHP", "JavaScript", "HTML5", "CSS3"],
         link: "https://drive.google.com/file/d/1mlVLPcdQsDg9bWOSuAPvfsQ5b9rIk16E/view?usp=drive_link",
         repo: "https://github.com/mfaatihyusron/socialact",
+      },
+      {
+        id: 6,
+        title: "ProdActivity",
+        year: "2026",
+        description: "Platform web AI-based 'mentor virtual' untuk menyeimbangkan akademik, organisasi, dan karir mahasiswa.",
+        longDescription: "Sebuah platform MVP yang dirancang khusus bagi mahasiswa untuk menavigasi kehidupan kampus. Fitur utamanya mencakup Profiling Roadmap dan Interactive AI Chatbot yang membantu mahasiswa mengelola waktu dan prioritas agar terhindar dari risiko burnout dan FOMO.",
+        image: "/prodactivity.png",
+        status: "In Development",
+        role: "Frontend Developer",
+        tags: ["React", "AI Integration", "Groq API", "Tailwind CSS", "JavaScript"],
+        link: "https://drive.google.com/file/d/1fqWi2qxW5VIiTGtoKAhwTqE9DiI8mtpY/view?usp=drive_link",
+        repo: "https://github.com/Liaurentino/ProjectWebBersama",
       }
     ]
   };
